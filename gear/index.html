@@ -56,7 +56,7 @@ import { Upload, Check, X, AlertTriangle, ChevronRight, ChevronDown, Star, Hamme
 const BRAND_TITLE = "GEAR COMMAND CENTER";
 const GUIDE_AUTHOR = 'Shakes'; // created the strategy / guide
 const APP_AUTHOR = 'Mridanc2'; // built this app
-const APP_VERSION = 'v9.5'; // bump this on every new build so you can confirm the deploy is live
+const APP_VERSION = 'v9.8'; // bump this on every new build so you can confirm the deploy is live
 const TROOPS = ['infantry', 'archer', 'cavalry'];
 const TROOP_LABEL = {
   infantry: 'Infantry',
@@ -5294,6 +5294,7 @@ const totalXp = r => {
   }
   // Backward compat: legacy `xp` field (single number)
   if (r.xp != null && r.xpBanked == null) t += r.xp;
+  if (r.gearMerge) t += (r.gearMerge.grey || 0) * 10 + (r.gearMerge.green || 0) * 30 + (r.gearMerge.blue || 0) * 60 + (r.gearMerge.purple || 0) * 150;
   return t;
 };
 
@@ -6427,7 +6428,7 @@ const gearScore = gear => {
     const base = RARITY_WEIGHT[p.rarity] || 0;
     const cap = LEVEL_CAP[p.rarity] || 100;
     const lvlF = 0.4 + 0.6 * Math.min(1, (p.level || 0) / cap);
-    const mF = 1 + 0.5 * Math.min(1, (p.mastery || 0) / MASTERY_MAX);
+    const mF = p.rarity === 'mythic' || p.rarity === 'red' ? 1 + 0.1 * (p.mastery || 0) : 1;
     s += base * lvlF * mF;
   }));
   return Math.round(s);
@@ -8618,6 +8619,12 @@ const ResourceEditor = ({
   const [hammers, setHammers] = useState(resources?.hammers ?? 0);
   const [mg, setMg] = useState(resources?.mythicGears ?? 0);
   const [mithril, setMithril] = useState(resources?.mithril ?? 0);
+  const [gearMerge, setGearMerge] = useState(() => ({
+    grey: resources?.gearMerge?.grey ?? 0,
+    green: resources?.gearMerge?.green ?? 0,
+    blue: resources?.gearMerge?.blue ?? 0,
+    purple: resources?.gearMerge?.purple ?? 0
+  }));
   const setTier = (tier, val) => {
     setXpParts(prev => ({
       ...prev,
@@ -8626,7 +8633,7 @@ const ResourceEditor = ({
   };
 
   // Live total preview
-  const computedTotal = xpBanked + XP_TIERS.reduce((sum, t) => sum + t * (xpParts[t] || 0), 0);
+  const computedTotal = xpBanked + XP_TIERS.reduce((sum, t) => sum + t * (xpParts[t] || 0), 0) + gearMerge.grey * 10 + gearMerge.green * 30 + gearMerge.blue * 60 + gearMerge.purple * 150;
   const save = () => {
     const xpPartsObj = {};
     XP_TIERS.forEach(t => {
@@ -8637,7 +8644,8 @@ const ResourceEditor = ({
       xpParts: xpPartsObj,
       hammers,
       mythicGears: mg,
-      mithril
+      mithril,
+      gearMerge
     });
   };
   return /*#__PURE__*/React.createElement("div", {
@@ -8785,6 +8793,65 @@ const ResourceEditor = ({
       }
     }, "= ", fmt(contributes)));
   })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: 'var(--kp-text-faint)',
+      marginBottom: 6
+    }
+  }, "Spare gear you can merge for XP:"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 6,
+      flexWrap: 'wrap',
+      marginBottom: 10
+    }
+  }, [['grey', 'Grey', 10, '#9ca3af'], ['green', 'Green', 30, '#22c55e'], ['blue', 'Blue', 60, '#3b82f6'], ['purple', 'Purple', 150, '#a855f7']].map(([key, label, xpv, color]) => /*#__PURE__*/React.createElement("div", {
+    key: key,
+    style: {
+      flex: 1,
+      minWidth: 70,
+      padding: '6px 7px',
+      borderRadius: 7,
+      background: 'var(--kp-surface-3)',
+      border: '1px solid ' + color + '44'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 4,
+      fontSize: 9.5,
+      color: 'var(--kp-text-dim)',
+      marginBottom: 3
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 9,
+      height: 9,
+      borderRadius: 2,
+      background: color,
+      display: 'inline-block'
+    }
+  }), label, " ", '\u00b7', xpv), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    inputMode: "numeric",
+    value: gearMerge[key],
+    onChange: e => setGearMerge(prev => ({
+      ...prev,
+      [key]: Math.max(0, parseInt(e.target.value) || 0)
+    })),
+    style: {
+      width: '100%',
+      padding: '5px 4px',
+      borderRadius: 5,
+      border: '1px solid rgba(255,255,255,0.12)',
+      background: 'var(--kp-surface-2)',
+      color: 'var(--kp-text)',
+      textAlign: 'center',
+      fontSize: 12,
+      fontWeight: 700
+    }
+  })))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: '7px 9px',
       borderRadius: 7,
@@ -12277,7 +12344,7 @@ const Footer = ({
       justifyContent: 'center',
       gap: 7
     }
-  }, "\u2139\uFE0F ", t('footer.howItWorks')), /*#__PURE__*/React.createElement("button", {
+  }, "\u2139\uFE0F ", t('footer.howItWorks')), onFeedback && /*#__PURE__*/React.createElement("button", {
     onClick: onFeedback,
     className: "kp-card",
     style: {
@@ -13633,7 +13700,7 @@ function App() {
     }))));
   })(), (() => {
     const power = gearScore(state.gear);
-    const MAX = TROOPS.length * SLOTS.length * (RARITY_WEIGHT.red || 5000) * 1.5;
+    const MAX = TROOPS.length * SLOTS.length * (RARITY_WEIGHT.red || 5000) * (1 + 0.1 * MASTERY_MAX);
     const pct = Math.min(100, Math.round(power / MAX * 100));
     return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -14530,9 +14597,6 @@ function App() {
     code: state.allianceCode,
     isAdmin: false
   })))), /*#__PURE__*/React.createElement(Footer, {
-    onFeedback: () => setShowFeedback(true),
-    onHowItWorks: () => setShowGateManual(true),
-    onSync: () => setShowSync(true),
     t: t
   }), /*#__PURE__*/React.createElement(VisitCounter, {
     visits: visits,
