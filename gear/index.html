@@ -56,7 +56,7 @@ import { Upload, Check, X, AlertTriangle, ChevronRight, ChevronDown, Star, Hamme
 const BRAND_TITLE = "GEAR COMMAND CENTER";
 const GUIDE_AUTHOR = 'Shakes'; // created the strategy / guide
 const APP_AUTHOR = 'Mridanc2'; // built this app
-const APP_VERSION = 'v7.7'; // bump this on every new build so you can confirm the deploy is live
+const APP_VERSION = 'v7.8'; // bump this on every new build so you can confirm the deploy is live
 const TROOPS = ['infantry', 'archer', 'cavalry'];
 const TROOP_LABEL = {
   infantry: 'Infantry',
@@ -6706,19 +6706,23 @@ const QuickGearSetup = ({
     return /*#__PURE__*/React.createElement("div", {
       key: sl,
       style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        flexWrap: 'wrap',
-        padding: '7px 0',
+        padding: '10px 0',
         borderTop: '1px solid rgba(201,169,97,0.1)'
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        width: 60,
-        fontSize: 12,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 8,
+        marginBottom: 8,
+        flexWrap: 'wrap'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
         color: 'var(--kp-text)',
-        fontWeight: 600
+        fontWeight: 700
       }
     }, SLOT_LABEL[sl]), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -6739,7 +6743,14 @@ const QuickGearSetup = ({
         cursor: 'pointer',
         textTransform: 'capitalize'
       }
-    }, r))), /*#__PURE__*/React.createElement("div", {
+    }, r)))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 18,
+        flexWrap: 'wrap'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
         alignItems: 'center',
@@ -6747,7 +6758,7 @@ const QuickGearSetup = ({
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
-        fontSize: 10,
+        fontSize: 11,
         color: 'var(--kp-text-dim)',
         marginRight: 2
       }
@@ -6810,7 +6821,7 @@ const QuickGearSetup = ({
     }), /*#__PURE__*/React.createElement("button", {
       onClick: () => setF(key, 'mastery', Math.min(MASTERY_MAX, (parseInt(d.mastery, 10) || 0) + 1)),
       style: stepBtn
-    }, "+")));
+    }, "+"))));
   }))), /*#__PURE__*/React.createElement("button", {
     onClick: () => onSave(draft),
     style: {
