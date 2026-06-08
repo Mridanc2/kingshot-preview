@@ -56,7 +56,7 @@ import { Upload, Check, X, AlertTriangle, ChevronRight, ChevronDown, Star, Hamme
 const BRAND_TITLE = "GEAR COMMAND CENTER";
 const GUIDE_AUTHOR = 'Shakes'; // created the strategy / guide
 const APP_AUTHOR = 'Mridanc2'; // built this app
-const APP_VERSION = 'v7.8'; // bump this on every new build so you can confirm the deploy is live
+const APP_VERSION = 'v7.9'; // bump this on every new build so you can confirm the deploy is live
 const TROOPS = ['infantry', 'archer', 'cavalry'];
 const TROOP_LABEL = {
   infantry: 'Infantry',
@@ -6579,265 +6579,120 @@ const Achievements = ({
     }
   }, "\uD83D\uDC46 ", tr('ach.tapHint'))));
 };
-const QuickGearSetup = ({
-  gear,
-  onSave,
-  onClose,
-  t
+const SetupScreen = ({
+  state,
+  onPickHero,
+  onAddResources,
+  onStart
 }) => {
-  const init = () => {
-    const d = {};
-    for (const tr of TROOPS) for (const sl of SLOTS) {
-      const p = gear[gearKey(tr, sl)];
-      d[gearKey(tr, sl)] = p ? {
-        rarity: p.rarity || 'mythic',
-        level: p.level ?? 0,
-        mastery: p.mastery ?? 0
-      } : {
-        rarity: 'mythic',
-        level: 0,
-        mastery: 0
-      };
+  const heroCount = TROOPS.filter(tr => state.heroes && state.heroes[tr]).length;
+  const heroesDone = heroCount >= 3;
+  const gearDone = state.gear && Object.keys(state.gear).length > 0;
+  const resDone = state.resources && Object.keys(state.resources).length > 0;
+  const stepEl = (n, done, title, sub, onClick) => (/*#__PURE__*/React.createElement('div', {
+    onClick,
+    key: n,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      textAlign: 'left',
+      background: 'var(--kp-surface-2)',
+      border: '1px solid rgba(201,169,97,0.2)',
+      borderRadius: 11,
+      padding: '13px 15px',
+      marginBottom: 10,
+      cursor: 'pointer'
     }
-    return d;
-  };
-  const [draft, setDraft] = useState(init);
-  const setF = (key, field, val) => setDraft(prev => {
-    const cur = {
-      ...prev[key],
-      [field]: val
-    };
-    if (field === 'rarity' && cur.level > LEVEL_CAP[val]) cur.level = LEVEL_CAP[val];
-    return {
-      ...prev,
-      [key]: cur
-    };
-  });
-  const clampNum = (v, max) => {
-    let n = parseInt(v, 10);
-    if (isNaN(n) || n < 0) n = 0;
-    if (n > max) n = max;
-    return n;
-  };
-  const stepBtn = {
-    width: 24,
-    height: 28,
-    borderRadius: 6,
-    border: '1px solid rgba(255,255,255,0.14)',
-    background: 'var(--kp-surface-3)',
-    color: 'var(--kp-text)',
-    fontSize: 15,
-    fontWeight: 700,
-    cursor: 'pointer',
-    lineHeight: 1,
-    padding: 0
-  };
+  }, /*#__PURE__*/React.createElement('div', {
+    style: {
+      width: 28,
+      height: 28,
+      borderRadius: '50%',
+      background: done ? '#22c55e' : 'var(--kp-text-gold)',
+      color: done ? '#fff' : '#1a1208',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontWeight: 800,
+      flexShrink: 0
+    }
+  }, done ? '\u2713' : n), /*#__PURE__*/React.createElement('div', {
+    style: {
+      minWidth: 0,
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement('div', {
+    style: {
+      fontWeight: 700,
+      fontSize: 14,
+      color: 'var(--kp-text)'
+    }
+  }, title), /*#__PURE__*/React.createElement('div', {
+    style: {
+      fontSize: 11,
+      color: 'var(--kp-text-dim)'
+    }
+  }, sub)), /*#__PURE__*/React.createElement('div', {
+    style: {
+      color: 'var(--kp-text-faint)'
+    }
+  }, '\u203A')));
   return /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'fixed',
       inset: 0,
-      zIndex: 120,
-      background: 'rgba(0,0,0,0.78)',
+      zIndex: 90,
+      background: 'rgba(6,12,24,0.94)',
       backdropFilter: 'blur(6px)',
       display: 'flex',
       alignItems: 'flex-start',
       justifyContent: 'center',
       padding: 16,
       overflowY: 'auto'
-    },
-    onClick: onClose
+    }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      background: 'var(--kp-modal)',
-      border: '1px solid rgba(201,169,97,0.4)',
+      background: 'var(--kp-panel)',
+      border: '1px solid rgba(201,169,97,0.5)',
       borderRadius: 14,
-      padding: 18,
-      maxWidth: 640,
+      padding: 20,
+      maxWidth: 440,
       width: '100%',
-      margin: '20px 0'
-    },
-    onClick: e => e.stopPropagation()
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: 6
+      margin: '28px 0',
+      textAlign: 'center'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: 'Cinzel, serif',
-      fontSize: 19,
+      color: 'var(--kp-text-gold)',
+      fontSize: 20,
       fontWeight: 800,
-      color: 'var(--kp-text-gold)'
-    }
-  }, '\u26A1', " Quick Gear Setup"), /*#__PURE__*/React.createElement("button", {
-    onClick: onClose,
-    style: {
-      background: 'none',
-      border: 'none',
-      color: 'var(--kp-text-dim)',
-      cursor: 'pointer',
-      fontSize: 20
-    }
-  }, '\u2715')), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: 'var(--kp-text-dim)',
-      marginBottom: 14
-    }
-  }, "Set every piece in one place ", '\u2014', " rarity, level, mastery ", '\u2014', " then tap Save."), TROOPS.map(tr => /*#__PURE__*/React.createElement("div", {
-    key: tr,
-    style: {
-      marginBottom: 14
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      fontWeight: 800,
-      color: TROOP_COLOR[tr],
-      letterSpacing: 0.5,
       marginBottom: 4
     }
-  }, TROOP_LABEL[tr].toUpperCase()), SLOTS.map(sl => {
-    const key = gearKey(tr, sl);
-    const d = draft[key];
-    const cap = LEVEL_CAP[d.rarity];
-    return /*#__PURE__*/React.createElement("div", {
-      key: sl,
-      style: {
-        padding: '10px 0',
-        borderTop: '1px solid rgba(201,169,97,0.1)'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 8,
-        marginBottom: 8,
-        flexWrap: 'wrap'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 13,
-        color: 'var(--kp-text)',
-        fontWeight: 700
-      }
-    }, SLOT_LABEL[sl]), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        gap: 3
-      }
-    }, EDITABLE_RARITIES.map(r => /*#__PURE__*/React.createElement("button", {
-      key: r,
-      onClick: () => setF(key, 'rarity', r),
-      style: {
-        padding: '4px 8px',
-        borderRadius: 6,
-        border: '1px solid ' + (d.rarity === r ? 'var(--kp-text-gold)' : 'rgba(255,255,255,0.12)'),
-        background: d.rarity === r ? 'rgba(201,169,97,0.18)' : 'transparent',
-        color: d.rarity === r ? 'var(--kp-text-gold)' : 'var(--kp-text-dim)',
-        fontSize: 10,
-        fontWeight: 700,
-        cursor: 'pointer',
-        textTransform: 'capitalize'
-      }
-    }, r)))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 18,
-        flexWrap: 'wrap'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 11,
-        color: 'var(--kp-text-dim)',
-        marginRight: 2
-      }
-    }, "Lv"), /*#__PURE__*/React.createElement("button", {
-      onClick: () => setF(key, 'level', Math.max(0, (parseInt(d.level, 10) || 0) - 1)),
-      style: stepBtn
-    }, '\u2212'), /*#__PURE__*/React.createElement("input", {
-      type: "text",
-      inputMode: "numeric",
-      value: d.level,
-      onChange: e => setF(key, 'level', clampNum(e.target.value, cap)),
-      style: {
-        width: 42,
-        padding: '5px 4px',
-        borderRadius: 6,
-        border: '1px solid rgba(255,255,255,0.12)',
-        background: 'var(--kp-surface-2)',
-        color: 'var(--kp-text)',
-        textAlign: 'center',
-        fontSize: 12
-      }
-    }), /*#__PURE__*/React.createElement("button", {
-      onClick: () => setF(key, 'level', Math.min(cap, (parseInt(d.level, 10) || 0) + 1)),
-      style: stepBtn
-    }, "+"), /*#__PURE__*/React.createElement("span", {
-      style: {
-        opacity: 0.5,
-        fontSize: 10
-      }
-    }, "/", cap)), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 10,
-        color: 'var(--kp-text-dim)',
-        marginRight: 2
-      }
-    }, "M"), /*#__PURE__*/React.createElement("button", {
-      onClick: () => setF(key, 'mastery', Math.max(0, (parseInt(d.mastery, 10) || 0) - 1)),
-      style: stepBtn
-    }, '\u2212'), /*#__PURE__*/React.createElement("input", {
-      type: "text",
-      inputMode: "numeric",
-      value: d.mastery,
-      onChange: e => setF(key, 'mastery', clampNum(e.target.value, MASTERY_MAX)),
-      style: {
-        width: 38,
-        padding: '5px 4px',
-        borderRadius: 6,
-        border: '1px solid rgba(255,255,255,0.12)',
-        background: 'var(--kp-surface-2)',
-        color: 'var(--kp-text)',
-        textAlign: 'center',
-        fontSize: 12
-      }
-    }), /*#__PURE__*/React.createElement("button", {
-      onClick: () => setF(key, 'mastery', Math.min(MASTERY_MAX, (parseInt(d.mastery, 10) || 0) + 1)),
-      style: stepBtn
-    }, "+"))));
-  }))), /*#__PURE__*/React.createElement("button", {
-    onClick: () => onSave(draft),
+  }, "Welcome, Commander"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--kp-text-dim)',
+      fontSize: 13,
+      marginBottom: 18,
+      lineHeight: 1.5
+    }
+  }, "Three quick steps and your personal gear plan is ready."), stepEl(1, heroesDone, 'Pick your 3 march heroes', heroesDone ? TROOPS.map(tr => state.heroes[tr]).join(' \u00b7 ') : heroCount + ' of 3 chosen \u2014 tap to pick', onPickHero), stepEl(2, gearDone, 'Add your gear', 'Tap your pieces on the board to set rarity & level', onStart), stepEl(3, resDone, 'Add your resources', 'XP, hammers, mythic gears, mithril', onAddResources), /*#__PURE__*/React.createElement("button", {
+    onClick: onStart,
     style: {
       width: '100%',
       marginTop: 8,
-      padding: '12px',
-      borderRadius: 10,
+      padding: 13,
       border: 'none',
+      borderRadius: 10,
       background: 'linear-gradient(135deg,#c9a961,#e0b96a)',
       color: '#1a1208',
       fontWeight: 800,
-      fontSize: 14,
-      cursor: 'pointer',
-      fontFamily: 'Cinzel, serif'
+      fontSize: 15,
+      fontFamily: 'Cinzel, serif',
+      cursor: 'pointer'
     }
-  }, "Save all gear")));
+  }, gearDone ? 'See my plan \u2192' : 'Start setting up')));
 };
 const PieceEditor = ({
   piece,
@@ -12669,7 +12524,7 @@ function App() {
     }
   });
   const [editingPiece, setEditingPiece] = useState(null);
-  const [quickOpen, setQuickOpen] = useState(false); // { troop, slot, piece }
+  const [setupDismissed, setSetupDismissed] = useState(false); // { troop, slot, piece }
   const [editingResources, setEditingResources] = useState(false);
   const [pickingTroopFor, setPickingTroopFor] = useState(null); // troop name when picker is open
   const [showFeedback, setShowFeedback] = useState(false);
@@ -12882,7 +12737,7 @@ function App() {
         next.gear[key] = {
           ...current,
           rarity: action.rarity,
-          level: current.rarity === action.rarity ? Math.max(current.level || 0, action.level) : action.level,
+          level: action.level,
           mastery: current.mastery || 0
         };
       } else if (action.type === 'ascend') {
@@ -13300,24 +13155,7 @@ function App() {
     resources: state.resources,
     onEdit: () => setEditingResources(true),
     t: t
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: 'center',
-      margin: '6px 0 12px'
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setQuickOpen(true),
-    style: {
-      padding: '9px 18px',
-      borderRadius: 10,
-      border: '1px solid var(--kp-text-gold)',
-      background: 'rgba(201,169,97,0.12)',
-      color: 'var(--kp-text-gold)',
-      fontWeight: 700,
-      fontSize: 13,
-      cursor: 'pointer'
-    }
-  }, '\u26A1', " Quick setup all gear")), /*#__PURE__*/React.createElement(PhaseOverview, {
+  }), /*#__PURE__*/React.createElement(PhaseOverview, {
     currentPhase: phase,
     gear: state.gear,
     path: activePath,
@@ -14324,17 +14162,6 @@ function App() {
       setEditingPiece(null);
     },
     onClose: () => setEditingPiece(null)
-  }), quickOpen && /*#__PURE__*/React.createElement(QuickGearSetup, {
-    gear: state.gear,
-    onSave: g => {
-      setState(prev => ({
-        ...prev,
-        gear: g
-      }));
-      setQuickOpen(false);
-    },
-    onClose: () => setQuickOpen(false),
-    t: t
   }), editingResources && /*#__PURE__*/React.createElement(ResourceEditor, {
     resources: state.resources,
     onSave: r => {
@@ -14353,6 +14180,14 @@ function App() {
       setPickingTroopFor(null);
     },
     onClose: () => setPickingTroopFor(null)
+  }), state && !setupDismissed && (!state.gear || Object.keys(state.gear).length === 0) && !(!state.allianceSetup && !state.gateSeen && ALLIANCE_DB_URL) && /*#__PURE__*/React.createElement(SetupScreen, {
+    state: state,
+    onPickHero: () => {
+      const m = TROOPS.find(tr => !(state.heroes && state.heroes[tr]));
+      setPickingTroopFor(m || 'infantry');
+    },
+    onAddResources: () => setEditingResources(true),
+    onStart: () => setSetupDismissed(true)
   }), (!state.allianceSetup && !state.gateSeen || showGateManual) && ALLIANCE_DB_URL && /*#__PURE__*/React.createElement(WelcomeGate, {
     t: t,
     invite: invite,
