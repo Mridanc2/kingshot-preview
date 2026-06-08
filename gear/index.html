@@ -56,7 +56,7 @@ import { Upload, Check, X, AlertTriangle, ChevronRight, ChevronDown, Star, Hamme
 const BRAND_TITLE = "GEAR COMMAND CENTER";
 const GUIDE_AUTHOR = 'Shakes'; // created the strategy / guide
 const APP_AUTHOR = 'Mridanc2'; // built this app
-const APP_VERSION = 'v8.3'; // bump this on every new build so you can confirm the deploy is live
+const APP_VERSION = 'v8.6'; // bump this on every new build so you can confirm the deploy is live
 const TROOPS = ['infantry', 'archer', 'cavalry'];
 const TROOP_LABEL = {
   infantry: 'Infantry',
@@ -5395,6 +5395,55 @@ const HAMMERS_FOR_MASTERY = toLevel => toLevel * 10;
 const MG_FOR_ASCEND = 2; // Mythic Gears to ascend Mythic → Red
 const MASTERY_FOR_ASCEND = 10; // Required Mastery Lv before ascending
 
+const RARITY_WORD = {
+  grey: 'Grey',
+  green: 'Green',
+  blue: 'Rare',
+  purple: 'Epic',
+  mythic: 'Mythic',
+  red: 'Red'
+};
+const fmtNum = n => n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'K' : String(n);
+const nextStage = piece => {
+  if (!piece) return null;
+  const r = piece.rarity,
+    lvl = piece.level || 0;
+  const cap = LEVEL_CAP[r] || 100;
+  const xpFn = XP_PER_LEVEL[r] || stepXp;
+  if (lvl < cap) {
+    const target = Math.min(cap, (Math.floor(lvl / 20) + 1) * 20);
+    let xp = 0;
+    for (let L = lvl + 1; L <= target; L++) xp += xpFn(L) || 0;
+    const mith = r === 'red' ? mithrilToReach(lvl, target) : 0;
+    const myth = r === 'red' ? redMgToReach(lvl, target) : 0;
+    return {
+      kind: 'level',
+      label: RARITY_WORD[r] + ' L' + target,
+      xp,
+      mith,
+      myth
+    };
+  }
+  if (r === 'mythic') return {
+    kind: 'ascend',
+    label: 'Ascend to Red',
+    myth: MG_FOR_ASCEND,
+    masteryReq: MASTERY_FOR_ASCEND
+  };
+  if (r === 'blue') return {
+    kind: 'upgrade',
+    label: 'Upgrade to Epic'
+  };
+  if (r === 'purple') return {
+    kind: 'upgrade',
+    label: 'Upgrade to Mythic'
+  };
+  return {
+    kind: 'maxed',
+    label: 'Fully maxed'
+  };
+};
+
 // ── XP needed to go from current state to target ──
 const xpToReach = (rarity, fromLevel, toLevel) => {
   let total = 0;
@@ -6694,365 +6743,6 @@ const SetupScreen = ({
     }
   }, gearDone ? 'See my plan \u2192' : 'Start setting up')));
 };
-const QuickGearSetup = ({
-  gear,
-  heroes,
-  onSave,
-  onClose
-}) => {
-  const init = () => {
-    const d = {};
-    for (const tr of TROOPS) for (const sl of SLOTS) {
-      const p = gear[gearKey(tr, sl)];
-      d[gearKey(tr, sl)] = p ? {
-        rarity: p.rarity || 'mythic',
-        level: p.level ?? 0,
-        mastery: p.mastery ?? 0
-      } : {
-        rarity: 'mythic',
-        level: 0,
-        mastery: 0
-      };
-    }
-    return d;
-  };
-  const [draft, setDraft] = useState(init);
-  const setF = (key, field, val) => setDraft(prev => {
-    const cur = {
-      ...prev[key],
-      [field]: val
-    };
-    if (field === 'rarity' && cur.level > LEVEL_CAP[val]) cur.level = LEVEL_CAP[val];
-    return {
-      ...prev,
-      [key]: cur
-    };
-  });
-  const clampNum = (v, max) => {
-    let n = parseInt(v, 10);
-    if (isNaN(n) || n < 0) n = 0;
-    if (n > max) n = max;
-    return n;
-  };
-  const stepBtn = {
-    width: 24,
-    height: 26,
-    borderRadius: 6,
-    border: '1px solid rgba(255,255,255,0.16)',
-    background: 'rgba(255,255,255,0.04)',
-    color: 'var(--kp-text)',
-    fontSize: 14,
-    fontWeight: 700,
-    cursor: 'pointer',
-    padding: 0,
-    lineHeight: 1
-  };
-  const inStyle = {
-    width: 40,
-    padding: '4px 3px',
-    borderRadius: 6,
-    border: '1px solid rgba(255,255,255,0.12)',
-    background: 'rgba(0,0,0,0.25)',
-    color: 'var(--kp-text)',
-    textAlign: 'center',
-    fontSize: 12,
-    fontWeight: 700
-  };
-  const setCount = TROOPS.reduce((a, tr) => a + SLOTS.filter(sl => {
-    const d = draft[gearKey(tr, sl)];
-    return d && ((d.level || 0) > 0 || (d.mastery || 0) > 0);
-  }).length, 0);
-  const pieceRow = (tr, sl) => {
-    const key = gearKey(tr, sl);
-    const d = draft[key];
-    const cap = LEVEL_CAP[d.rarity];
-    const th = RARITY_THEME[d.rarity] || RARITY_THEME.mythic;
-    const img = GEAR_IMAGES[tr] && GEAR_IMAGES[tr][sl] && (GEAR_IMAGES[tr][sl][d.rarity] || GEAR_IMAGES[tr][sl].mythic) || '';
-    return /*#__PURE__*/React.createElement("div", {
-      key: sl,
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 9,
-        background: 'rgba(255,255,255,0.02)',
-        border: '1px solid ' + th.edge + '2e',
-        borderRadius: 9,
-        padding: '7px 9px',
-        marginBottom: 6,
-        flexWrap: 'wrap'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 38,
-        height: 38,
-        borderRadius: 8,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: th.bg + '55',
-        border: '1px solid ' + th.edge,
-        boxShadow: '0 0 8px ' + th.glow + '40, inset 0 0 0 1px ' + th.edge + '55',
-        flexShrink: 0
-      }
-    }, img ? /*#__PURE__*/React.createElement("img", {
-      src: img,
-      alt: sl,
-      style: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'contain'
-      }
-    }) : null), /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 52,
-        fontSize: 12,
-        fontWeight: 800,
-        color: 'var(--kp-text)'
-      }
-    }, SLOT_LABEL[sl]), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        gap: 4,
-        flexWrap: 'wrap'
-      }
-    }, EDITABLE_RARITIES.map(r => {
-      const rt = RARITY_THEME[r];
-      const on = d.rarity === r;
-      return /*#__PURE__*/React.createElement("button", {
-        key: r,
-        onClick: () => setF(key, 'rarity', r),
-        style: {
-          padding: '3px 8px',
-          borderRadius: 6,
-          fontSize: 10,
-          fontWeight: 800,
-          textTransform: 'capitalize',
-          cursor: 'pointer',
-          border: '1px solid ' + rt.edge,
-          background: on ? rt.edge : 'transparent',
-          color: on ? '#0b1220' : rt.edge,
-          boxShadow: on ? '0 0 8px ' + rt.glow + 'aa' : 'none',
-          opacity: on ? 1 : 0.78
-        }
-      }, r);
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10,
-        flexWrap: 'wrap',
-        marginLeft: 'auto'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 10,
-        color: 'var(--kp-text-dim)',
-        marginRight: 1
-      }
-    }, "Lv"), /*#__PURE__*/React.createElement("button", {
-      onClick: () => setF(key, 'level', Math.max(0, (parseInt(d.level, 10) || 0) - 1)),
-      style: stepBtn
-    }, '\u2212'), /*#__PURE__*/React.createElement("input", {
-      type: "text",
-      inputMode: "numeric",
-      value: d.level,
-      onChange: e => setF(key, 'level', clampNum(e.target.value, cap)),
-      style: inStyle
-    }), /*#__PURE__*/React.createElement("button", {
-      onClick: () => setF(key, 'level', Math.min(cap, (parseInt(d.level, 10) || 0) + 1)),
-      style: stepBtn
-    }, "+")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 10,
-        color: 'var(--kp-text-dim)',
-        marginRight: 1
-      }
-    }, "M"), /*#__PURE__*/React.createElement("button", {
-      onClick: () => setF(key, 'mastery', Math.max(0, (parseInt(d.mastery, 10) || 0) - 1)),
-      style: stepBtn
-    }, '\u2212'), /*#__PURE__*/React.createElement("input", {
-      type: "text",
-      inputMode: "numeric",
-      value: d.mastery,
-      onChange: e => setF(key, 'mastery', clampNum(e.target.value, MASTERY_MAX)),
-      style: {
-        ...inStyle,
-        width: 36
-      }
-    }), /*#__PURE__*/React.createElement("button", {
-      onClick: () => setF(key, 'mastery', Math.min(MASTERY_MAX, (parseInt(d.mastery, 10) || 0) + 1)),
-      style: stepBtn
-    }, "+"))));
-  };
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: 'fixed',
-      inset: 0,
-      zIndex: 120,
-      background: 'rgba(6,12,24,0.88)',
-      backdropFilter: 'blur(8px)',
-      display: 'flex',
-      alignItems: 'flex-start',
-      justifyContent: 'center',
-      padding: 14,
-      overflowY: 'auto'
-    },
-    onClick: onClose
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: 'var(--kp-modal)',
-      border: '1px solid rgba(201,169,97,0.4)',
-      borderRadius: 16,
-      padding: 16,
-      maxWidth: 600,
-      width: '100%',
-      margin: '16px 0',
-      boxShadow: '0 20px 60px rgba(0,0,0,0.5)'
-    },
-    onClick: e => e.stopPropagation()
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: 3
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: 'Cinzel, serif',
-      fontSize: 18,
-      fontWeight: 800,
-      color: 'var(--kp-text-gold)'
-    }
-  }, '\u26A1', " Quick Gear Update"), /*#__PURE__*/React.createElement("button", {
-    onClick: onClose,
-    style: {
-      background: 'none',
-      border: 'none',
-      color: 'var(--kp-text-dim)',
-      cursor: 'pointer',
-      fontSize: 20
-    }
-  }, '\u2715')), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: 'var(--kp-text-dim)',
-      marginBottom: 12
-    }
-  }, "Tap a rarity, set the level ", '\u2014', " all your pieces in one place."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 14
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      fontSize: 11,
-      color: 'var(--kp-text-dim)',
-      marginBottom: 4
-    }
-  }, /*#__PURE__*/React.createElement("span", null, setCount, " of 12 pieces set"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      color: 'var(--kp-text-gold)',
-      fontWeight: 700
-    }
-  }, Math.round(setCount / 12 * 100), "%")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      height: 6,
-      borderRadius: 99,
-      background: 'rgba(255,255,255,0.08)',
-      overflow: 'hidden'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      height: '100%',
-      width: setCount / 12 * 100 + '%',
-      background: 'linear-gradient(90deg,#c9a961,#e0b96a)',
-      transition: 'width 0.25s'
-    }
-  }))), TROOPS.map(tr => {
-    const hero = heroes && heroes[tr];
-    const hp = hero && HERO_PORTRAITS[hero];
-    return /*#__PURE__*/React.createElement("div", {
-      key: tr,
-      style: {
-        marginBottom: 11
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        marginBottom: 6
-      }
-    }, hp ? /*#__PURE__*/React.createElement("img", {
-      src: hp,
-      alt: hero,
-      style: {
-        width: 30,
-        height: 30,
-        borderRadius: '50%',
-        border: '2px solid ' + TROOP_COLOR[tr],
-        objectFit: 'cover'
-      }
-    }) : /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 30,
-        height: 30,
-        borderRadius: '50%',
-        border: '2px solid ' + TROOP_COLOR[tr],
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'rgba(255,255,255,0.05)',
-        color: TROOP_COLOR[tr],
-        fontWeight: 800,
-        fontSize: 13
-      }
-    }, (hero || TROOP_LABEL[tr]).charAt(0)), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 13,
-        fontWeight: 800,
-        color: 'var(--kp-text)'
-      }
-    }, hero || TROOP_LABEL[tr]), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9,
-        fontWeight: 800,
-        letterSpacing: 0.5,
-        color: TROOP_COLOR[tr]
-      }
-    }, TROOP_LABEL[tr].toUpperCase())), SLOTS.map(sl => pieceRow(tr, sl)));
-  }), /*#__PURE__*/React.createElement("button", {
-    onClick: () => onSave(draft),
-    style: {
-      width: '100%',
-      marginTop: 4,
-      padding: '12px',
-      borderRadius: 11,
-      border: 'none',
-      background: 'linear-gradient(135deg,#c9a961,#e0b96a)',
-      color: '#1a1208',
-      fontWeight: 800,
-      fontSize: 15,
-      cursor: 'pointer',
-      fontFamily: 'Cinzel, serif',
-      boxShadow: '0 4px 16px rgba(201,169,97,0.3)'
-    }
-  }, '\u2713', " Save all gear")));
-};
 const PieceEditor = ({
   piece,
   troop,
@@ -7615,6 +7305,7 @@ const HeroBoard = ({
   t
 }) => {
   const tr = t || (k => k);
+  const [openSlot, setOpenSlot] = useState(null);
   const troopColor = TROOP_COLOR[troop];
   const hasGear = SLOTS.some(s => gear[gearKey(troop, s)]);
   return /*#__PURE__*/React.createElement("div", {
@@ -7803,33 +7494,79 @@ const HeroBoard = ({
       }
     }, EDITABLE_RARITIES.map(r => {
       const active = piece.rarity === r;
-      const col = RARITY_THEME[r] && RARITY_THEME[r].glow || '#c9a961';
+      const col = RARITY_THEME[r] && RARITY_THEME[r].edge || '#c9a961';
       return /*#__PURE__*/React.createElement("button", {
         key: r,
         onClick: () => onSetRarity(troop, slot, r),
         title: tr('rarity.' + r),
         style: {
           flex: 1,
-          height: 19,
-          borderRadius: 5,
+          height: 24,
+          borderRadius: 6,
           padding: 0,
           cursor: 'pointer',
           background: active ? col : `${col}22`,
           border: active ? '1.5px solid #fff' : `1px solid ${col}66`,
           boxShadow: active ? `0 0 6px ${col}` : 'none',
-          fontSize: 8.5,
+          fontSize: 10,
           fontWeight: 800,
           fontFamily: 'inherit',
           color: active ? '#0f0d0a' : col,
           letterSpacing: 0.3
         }
       }, {
-        blue: 'Ra',
-        purple: 'Ep',
-        mythic: 'My',
-        red: 'Rd'
-      }[r] || tr('rarity.' + r).slice(0, 1).toUpperCase());
-    })));
+        blue: 'Rare',
+        purple: 'Epic',
+        mythic: 'Mythic',
+        red: 'Red'
+      }[r] || tr('rarity.' + r));
+    })), piece && (() => {
+      const ns = nextStage(piece);
+      if (!ns) return null;
+      const open = openSlot === slot;
+      return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("button", {
+        onClick: () => setOpenSlot(open ? null : slot),
+        style: {
+          width: '100%',
+          height: 22,
+          borderRadius: 5,
+          border: '1px solid rgba(201,169,97,0.25)',
+          background: 'transparent',
+          color: 'var(--kp-text-dim)',
+          fontSize: 9.5,
+          fontWeight: 700,
+          cursor: 'pointer',
+          fontFamily: 'inherit'
+        }
+      }, open ? '\u25B4 Hide' : '\u25BE What\u2019s left?'), open && /*#__PURE__*/React.createElement("div", {
+        style: {
+          marginTop: 5,
+          padding: '7px 8px',
+          borderRadius: 6,
+          background: 'rgba(0,0,0,0.3)',
+          fontSize: 10,
+          color: 'var(--kp-text-dim)',
+          lineHeight: 1.55
+        }
+      }, ns.kind === 'maxed' && /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: '#22c55e',
+          fontWeight: 700
+        }
+      }, '\u2713', " Fully maxed"), ns.kind === 'upgrade' && /*#__PURE__*/React.createElement("span", null, "Next: ", /*#__PURE__*/React.createElement("b", {
+        style: {
+          color: 'var(--kp-text)'
+        }
+      }, ns.label)), ns.kind === 'ascend' && /*#__PURE__*/React.createElement("span", null, "Next: ", /*#__PURE__*/React.createElement("b", {
+        style: {
+          color: '#ef4444'
+        }
+      }, ns.label), /*#__PURE__*/React.createElement("br", null), "Needs Mastery ", ns.masteryReq, " + ", ns.myth, " Mythic Gears"), ns.kind === 'level' && /*#__PURE__*/React.createElement("span", null, "To ", /*#__PURE__*/React.createElement("b", {
+        style: {
+          color: 'var(--kp-text)'
+        }
+      }, ns.label), ":", /*#__PURE__*/React.createElement("br", null), '\u2728', " ", fmtNum(ns.xp), " XP", ns.mith ? ' \u00b7 ' + ns.mith + ' Mithril' : '', ns.myth ? ' \u00b7 ' + ns.myth + ' Mythic' : '')));
+    })());
   })));
 };
 
@@ -12883,7 +12620,6 @@ function App() {
     }
   });
   const [editingPiece, setEditingPiece] = useState(null);
-  const [quickOpen, setQuickOpen] = useState(false);
   const [setupDismissed, setSetupDismissed] = useState(false); // { troop, slot, piece }
   const [editingResources, setEditingResources] = useState(false);
   const [pickingTroopFor, setPickingTroopFor] = useState(null); // troop name when picker is open
@@ -13335,11 +13071,7 @@ function App() {
       id: 'second',
       label: t('tab.second'),
       Icon: Copy
-    }, ...(ALLIANCE_DB_URL ? [{
-      id: 'alliance',
-      label: t('tab.alliance'),
-      Icon: Sword
-    }] : [])];
+    }];
     return /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
@@ -13517,13 +13249,45 @@ function App() {
     onEdit: () => setEditingResources(true),
     t: t
   }), (() => {
-    const gc = Object.keys(state.gear || {}).length;
+    const gc = TROOPS.reduce((a, tr) => a + SLOTS.filter(sl => {
+      const d = state.gear[gearKey(tr, sl)];
+      return d && ((d.level || 0) > 0 || (d.mastery || 0) > 0);
+    }).length, 0);
+    const pct = Math.round(gc / 12 * 100);
     const stale = !state.gearUpdatedAt || Date.now() - state.gearUpdatedAt > 7 * 24 * 3600 * 1000;
     return /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 12
       }
-    }, (gc === 0 || stale) && /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        fontSize: 11,
+        color: 'var(--kp-text-dim)',
+        marginBottom: 4
+      }
+    }, /*#__PURE__*/React.createElement("span", null, gc, " of 12 pieces set"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: 'var(--kp-text-gold)',
+        fontWeight: 700
+      }
+    }, pct, "%")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        height: 6,
+        borderRadius: 99,
+        background: 'rgba(255,255,255,0.08)',
+        overflow: 'hidden',
+        marginBottom: gc === 0 || stale ? 10 : 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        height: '100%',
+        width: pct + '%',
+        background: 'linear-gradient(90deg,#c9a961,#e0b96a)',
+        transition: 'width 0.25s'
+      }
+    })), (gc === 0 || stale) && /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
         alignItems: 'center',
@@ -13532,8 +13296,7 @@ function App() {
         background: 'rgba(201,169,97,0.1)',
         border: '1px solid var(--kp-text-gold)',
         borderRadius: 11,
-        padding: '11px 14px',
-        marginBottom: 10
+        padding: '11px 14px'
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
@@ -13543,7 +13306,13 @@ function App() {
         minWidth: 160
       }
     }, gc === 0 ? 'Add your gear to unlock your plan.' : 'Keep your gear current so your plan stays accurate.'), /*#__PURE__*/React.createElement("button", {
-      onClick: () => setQuickOpen(true),
+      onClick: () => {
+        const el = document.getElementById('kp-gear-edit');
+        if (el) el.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      },
       style: {
         padding: '8px 14px',
         borderRadius: 9,
@@ -13555,20 +13324,7 @@ function App() {
         cursor: 'pointer',
         whiteSpace: 'nowrap'
       }
-    }, "Update now")), /*#__PURE__*/React.createElement("button", {
-      onClick: () => setQuickOpen(true),
-      style: {
-        width: '100%',
-        padding: '10px',
-        borderRadius: 10,
-        border: '1px solid var(--kp-text-gold)',
-        background: 'rgba(201,169,97,0.08)',
-        color: 'var(--kp-text-gold)',
-        fontWeight: 700,
-        fontSize: 13,
-        cursor: 'pointer'
-      }
-    }, '\u26A1', " Quick update all gear"));
+    }, gc === 0 ? 'Set up gear' : 'Update now')));
   })(), /*#__PURE__*/React.createElement(PhaseOverview, {
     currentPhase: phase,
     gear: state.gear,
@@ -13626,6 +13382,7 @@ function App() {
   }) : /*#__PURE__*/React.createElement(ChevronRight, {
     size: 15
   }))), showGear && /*#__PURE__*/React.createElement("div", {
+    id: "kp-gear-edit",
     className: "heroes-grid",
     style: {
       display: 'grid',
@@ -14576,18 +14333,6 @@ function App() {
       setEditingPiece(null);
     },
     onClose: () => setEditingPiece(null)
-  }), quickOpen && /*#__PURE__*/React.createElement(QuickGearSetup, {
-    gear: state.gear,
-    heroes: state.heroes,
-    onSave: g => {
-      setState(prev => ({
-        ...prev,
-        gear: g,
-        gearUpdatedAt: Date.now()
-      }));
-      setQuickOpen(false);
-    },
-    onClose: () => setQuickOpen(false)
   }), editingResources && /*#__PURE__*/React.createElement(ResourceEditor, {
     resources: state.resources,
     onSave: r => {
@@ -14614,7 +14359,7 @@ function App() {
     },
     onAddResources: () => setEditingResources(true),
     onStart: () => setSetupDismissed(true)
-  }), (!state.allianceSetup && !state.gateSeen || showGateManual) && ALLIANCE_DB_URL && /*#__PURE__*/React.createElement(WelcomeGate, {
+  }), false && /*#__PURE__*/React.createElement(WelcomeGate, {
     t: t,
     invite: invite,
     onClose: () => {
