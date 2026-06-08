@@ -56,7 +56,7 @@ import { Upload, Check, X, AlertTriangle, ChevronRight, ChevronDown, Star, Hamme
 const BRAND_TITLE = "GEAR COMMAND CENTER";
 const GUIDE_AUTHOR = 'Shakes'; // created the strategy / guide
 const APP_AUTHOR = 'Mridanc2'; // built this app
-const APP_VERSION = 'v9.4'; // bump this on every new build so you can confirm the deploy is live
+const APP_VERSION = 'v9.5'; // bump this on every new build so you can confirm the deploy is live
 const TROOPS = ['infantry', 'archer', 'cavalry'];
 const TROOP_LABEL = {
   infantry: 'Infantry',
@@ -7687,18 +7687,11 @@ const PhaseOverview = ({
   t
 }) => {
   const tr = t || ((k, v) => k);
-  const [openPhase, setOpenPhase] = useState(currentPhase?.phase ?? null); // current phase open by default
+  const [openPhase, setOpenPhase] = useState(null); // collapsed by default (detail lives in the action card below)
   const [showFull, setShowFull] = useState(false);
   const phases = path.filter(p => !p.isStop && !p.isChoose);
   const prog = pathProgress(gear, path);
   const curP = prog.per[currentPhase.phase];
-
-  // Keep the current phase's breakdown open by default, and re-open it when you advance a phase.
-  useEffect(() => {
-    if (currentPhase && currentPhase.phase && !currentPhase.isStop && !currentPhase.isChoose) {
-      setOpenPhase(currentPhase.phase);
-    }
-  }, [currentPhase?.phase]);
   const togglePhase = num => {
     setOpenPhase(prev => prev === num ? null : num);
   };
