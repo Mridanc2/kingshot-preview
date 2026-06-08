@@ -56,7 +56,7 @@ import { Upload, Check, X, AlertTriangle, ChevronRight, ChevronDown, Star, Hamme
 const BRAND_TITLE = "GEAR COMMAND CENTER";
 const GUIDE_AUTHOR = 'Shakes'; // created the strategy / guide
 const APP_AUTHOR = 'Mridanc2'; // built this app
-const APP_VERSION = 'v7.9'; // bump this on every new build so you can confirm the deploy is live
+const APP_VERSION = 'v8.0'; // bump this on every new build so you can confirm the deploy is live
 const TROOPS = ['infantry', 'archer', 'cavalry'];
 const TROOP_LABEL = {
   infantry: 'Infantry',
@@ -6694,6 +6694,260 @@ const SetupScreen = ({
     }
   }, gearDone ? 'See my plan \u2192' : 'Start setting up')));
 };
+const QuickGearSetup = ({
+  gear,
+  onSave,
+  onClose
+}) => {
+  const init = () => {
+    const d = {};
+    for (const tr of TROOPS) for (const sl of SLOTS) {
+      const p = gear[gearKey(tr, sl)];
+      d[gearKey(tr, sl)] = p ? {
+        rarity: p.rarity || 'mythic',
+        level: p.level ?? 0,
+        mastery: p.mastery ?? 0
+      } : {
+        rarity: 'mythic',
+        level: 0,
+        mastery: 0
+      };
+    }
+    return d;
+  };
+  const [draft, setDraft] = useState(init);
+  const setF = (key, field, val) => setDraft(prev => {
+    const cur = {
+      ...prev[key],
+      [field]: val
+    };
+    if (field === 'rarity' && cur.level > LEVEL_CAP[val]) cur.level = LEVEL_CAP[val];
+    return {
+      ...prev,
+      [key]: cur
+    };
+  });
+  const clampNum = (v, max) => {
+    let n = parseInt(v, 10);
+    if (isNaN(n) || n < 0) n = 0;
+    if (n > max) n = max;
+    return n;
+  };
+  const stepBtn = {
+    width: 26,
+    height: 30,
+    borderRadius: 6,
+    border: '1px solid rgba(255,255,255,0.14)',
+    background: 'var(--kp-surface-3)',
+    color: 'var(--kp-text)',
+    fontSize: 16,
+    fontWeight: 700,
+    cursor: 'pointer',
+    padding: 0,
+    lineHeight: 1
+  };
+  const inStyle = {
+    width: 44,
+    padding: '5px 4px',
+    borderRadius: 6,
+    border: '1px solid rgba(255,255,255,0.12)',
+    background: 'var(--kp-surface-2)',
+    color: 'var(--kp-text)',
+    textAlign: 'center',
+    fontSize: 12
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: 120,
+      background: 'rgba(6,12,24,0.85)',
+      backdropFilter: 'blur(6px)',
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'center',
+      padding: 16,
+      overflowY: 'auto'
+    },
+    onClick: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--kp-modal)',
+      border: '1px solid rgba(201,169,97,0.4)',
+      borderRadius: 14,
+      padding: 18,
+      maxWidth: 560,
+      width: '100%',
+      margin: '20px 0'
+    },
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'Cinzel, serif',
+      fontSize: 19,
+      fontWeight: 800,
+      color: 'var(--kp-text-gold)'
+    }
+  }, '\u26A1', " Quick Gear Update"), /*#__PURE__*/React.createElement("button", {
+    onClick: onClose,
+    style: {
+      background: 'none',
+      border: 'none',
+      color: 'var(--kp-text-dim)',
+      cursor: 'pointer',
+      fontSize: 20
+    }
+  }, '\u2715')), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--kp-text-dim)',
+      marginBottom: 14
+    }
+  }, "Update all your pieces in one place, then tap Save."), TROOPS.map(tr => /*#__PURE__*/React.createElement("div", {
+    key: tr,
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 800,
+      color: TROOP_COLOR[tr],
+      letterSpacing: 0.5,
+      marginBottom: 4
+    }
+  }, TROOP_LABEL[tr].toUpperCase()), SLOTS.map(sl => {
+    const key = gearKey(tr, sl);
+    const d = draft[key];
+    const cap = LEVEL_CAP[d.rarity];
+    return /*#__PURE__*/React.createElement("div", {
+      key: sl,
+      style: {
+        padding: '10px 0',
+        borderTop: '1px solid rgba(201,169,97,0.1)'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 8,
+        marginBottom: 8,
+        flexWrap: 'wrap'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13,
+        color: 'var(--kp-text)',
+        fontWeight: 700
+      }
+    }, SLOT_LABEL[sl]), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 3
+      }
+    }, EDITABLE_RARITIES.map(r => /*#__PURE__*/React.createElement("button", {
+      key: r,
+      onClick: () => setF(key, 'rarity', r),
+      style: {
+        padding: '4px 8px',
+        borderRadius: 6,
+        border: '1px solid ' + (d.rarity === r ? 'var(--kp-text-gold)' : 'rgba(255,255,255,0.12)'),
+        background: d.rarity === r ? 'rgba(201,169,97,0.18)' : 'transparent',
+        color: d.rarity === r ? 'var(--kp-text-gold)' : 'var(--kp-text-dim)',
+        fontSize: 10,
+        fontWeight: 700,
+        cursor: 'pointer',
+        textTransform: 'capitalize'
+      }
+    }, r)))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 18,
+        flexWrap: 'wrap'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: 'var(--kp-text-dim)',
+        marginRight: 2
+      }
+    }, "Lv"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setF(key, 'level', Math.max(0, (parseInt(d.level, 10) || 0) - 1)),
+      style: stepBtn
+    }, '\u2212'), /*#__PURE__*/React.createElement("input", {
+      type: "text",
+      inputMode: "numeric",
+      value: d.level,
+      onChange: e => setF(key, 'level', clampNum(e.target.value, cap)),
+      style: inStyle
+    }), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setF(key, 'level', Math.min(cap, (parseInt(d.level, 10) || 0) + 1)),
+      style: stepBtn
+    }, "+"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        opacity: 0.5,
+        fontSize: 10
+      }
+    }, "/", cap)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: 'var(--kp-text-dim)',
+        marginRight: 2
+      }
+    }, "M"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setF(key, 'mastery', Math.max(0, (parseInt(d.mastery, 10) || 0) - 1)),
+      style: stepBtn
+    }, '\u2212'), /*#__PURE__*/React.createElement("input", {
+      type: "text",
+      inputMode: "numeric",
+      value: d.mastery,
+      onChange: e => setF(key, 'mastery', clampNum(e.target.value, MASTERY_MAX)),
+      style: {
+        ...inStyle,
+        width: 38
+      }
+    }), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setF(key, 'mastery', Math.min(MASTERY_MAX, (parseInt(d.mastery, 10) || 0) + 1)),
+      style: stepBtn
+    }, "+"))));
+  }))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => onSave(draft),
+    style: {
+      width: '100%',
+      marginTop: 8,
+      padding: '12px',
+      borderRadius: 10,
+      border: 'none',
+      background: 'linear-gradient(135deg,#c9a961,#e0b96a)',
+      color: '#1a1208',
+      fontWeight: 800,
+      fontSize: 14,
+      cursor: 'pointer',
+      fontFamily: 'Cinzel, serif'
+    }
+  }, "Save all gear")));
+};
 const PieceEditor = ({
   piece,
   troop,
@@ -12524,6 +12778,7 @@ function App() {
     }
   });
   const [editingPiece, setEditingPiece] = useState(null);
+  const [quickOpen, setQuickOpen] = useState(false);
   const [setupDismissed, setSetupDismissed] = useState(false); // { troop, slot, piece }
   const [editingResources, setEditingResources] = useState(false);
   const [pickingTroopFor, setPickingTroopFor] = useState(null); // troop name when picker is open
@@ -12676,6 +12931,7 @@ function App() {
     setState(prev => {
       const next = JSON.parse(JSON.stringify(prev));
       if (newPiece == null) delete next.gear[gearKey(troop, slot)];else next.gear[gearKey(troop, slot)] = newPiece;
+      next.gearUpdatedAt = Date.now();
       return next;
     });
   };
@@ -13155,7 +13411,60 @@ function App() {
     resources: state.resources,
     onEdit: () => setEditingResources(true),
     t: t
-  }), /*#__PURE__*/React.createElement(PhaseOverview, {
+  }), (() => {
+    const gc = Object.keys(state.gear || {}).length;
+    const stale = !state.gearUpdatedAt || Date.now() - state.gearUpdatedAt > 7 * 24 * 3600 * 1000;
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: 12
+      }
+    }, (gc === 0 || stale) && /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        flexWrap: 'wrap',
+        background: 'rgba(201,169,97,0.1)',
+        border: '1px solid var(--kp-text-gold)',
+        borderRadius: 11,
+        padding: '11px 14px',
+        marginBottom: 10
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 13,
+        color: 'var(--kp-text)',
+        flex: 1,
+        minWidth: 160
+      }
+    }, gc === 0 ? 'Add your gear to unlock your plan.' : 'Keep your gear current so your plan stays accurate.'), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setQuickOpen(true),
+      style: {
+        padding: '8px 14px',
+        borderRadius: 9,
+        border: 'none',
+        background: 'linear-gradient(135deg,#c9a961,#e0b96a)',
+        color: '#1a1208',
+        fontWeight: 800,
+        fontSize: 13,
+        cursor: 'pointer',
+        whiteSpace: 'nowrap'
+      }
+    }, "Update now")), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setQuickOpen(true),
+      style: {
+        width: '100%',
+        padding: '10px',
+        borderRadius: 10,
+        border: '1px solid var(--kp-text-gold)',
+        background: 'rgba(201,169,97,0.08)',
+        color: 'var(--kp-text-gold)',
+        fontWeight: 700,
+        fontSize: 13,
+        cursor: 'pointer'
+      }
+    }, '\u26A1', " Quick update all gear"));
+  })(), /*#__PURE__*/React.createElement(PhaseOverview, {
     currentPhase: phase,
     gear: state.gear,
     path: activePath,
@@ -14162,6 +14471,17 @@ function App() {
       setEditingPiece(null);
     },
     onClose: () => setEditingPiece(null)
+  }), quickOpen && /*#__PURE__*/React.createElement(QuickGearSetup, {
+    gear: state.gear,
+    onSave: g => {
+      setState(prev => ({
+        ...prev,
+        gear: g,
+        gearUpdatedAt: Date.now()
+      }));
+      setQuickOpen(false);
+    },
+    onClose: () => setQuickOpen(false)
   }), editingResources && /*#__PURE__*/React.createElement(ResourceEditor, {
     resources: state.resources,
     onSave: r => {
