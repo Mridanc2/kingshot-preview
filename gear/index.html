@@ -56,7 +56,7 @@ import { Upload, Check, X, AlertTriangle, ChevronRight, ChevronDown, Star, Hamme
 const BRAND_TITLE = "GEAR COMMAND CENTER";
 const GUIDE_AUTHOR = 'Shakes'; // created the strategy / guide
 const APP_AUTHOR = 'Mridanc2'; // built this app
-const APP_VERSION = 'v8.7'; // bump this on every new build so you can confirm the deploy is live
+const APP_VERSION = 'v8.8'; // bump this on every new build so you can confirm the deploy is live
 const TROOPS = ['infantry', 'archer', 'cavalry'];
 const TROOP_LABEL = {
   infantry: 'Infantry',
@@ -6406,15 +6406,27 @@ const gearStats = gear => {
 // Overall gear-strength score across all 12 pieces — rarity dominates, then
 // level, then mastery. Used to rank players who are tied on Red count so the
 // genuinely stronger player ranks higher even before anyone has Red gear.
+const RARITY_WEIGHT = {
+  grey: 50,
+  green: 150,
+  blue: 400,
+  purple: 900,
+  mythic: 2000,
+  red: 5000
+};
 const gearScore = gear => {
   if (!gear) return 0;
   let s = 0;
   TROOPS.forEach(tr => SLOTS.forEach(sl => {
     const p = gear[`${tr}-${sl}`];
     if (!p) return;
-    s += (RARITY_RANK[p.rarity] || 0) * 1000 + (p.level || 0) * 5 + (p.mastery || 0) * 25;
+    const base = RARITY_WEIGHT[p.rarity] || 0;
+    const cap = LEVEL_CAP[p.rarity] || 100;
+    const lvlF = 0.4 + 0.6 * Math.min(1, (p.level || 0) / cap);
+    const mF = 1 + 0.5 * Math.min(1, (p.mastery || 0) / MASTERY_MAX);
+    s += base * lvlF * mF;
   }));
-  return s;
+  return Math.round(s);
 };
 const ACHIEVEMENTS = [{
   id: 'first_red',
@@ -13188,7 +13200,7 @@ function App() {
     }))));
   })(), (() => {
     const power = gearScore(state.gear);
-    const MAX = TROOPS.length * SLOTS.length * ((RARITY_RANK.red || 6) * 1000 + (LEVEL_CAP.red || 100) * 5 + MASTERY_MAX * 25);
+    const MAX = TROOPS.length * SLOTS.length * (RARITY_WEIGHT.red || 5000) * 1.5;
     const pct = Math.min(100, Math.round(power / MAX * 100));
     return /*#__PURE__*/React.createElement("div", {
       style: {
