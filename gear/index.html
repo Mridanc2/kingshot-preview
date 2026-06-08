@@ -56,7 +56,7 @@ import { Upload, Check, X, AlertTriangle, ChevronRight, ChevronDown, Star, Hamme
 const BRAND_TITLE = "GEAR COMMAND CENTER";
 const GUIDE_AUTHOR = 'Shakes'; // created the strategy / guide
 const APP_AUTHOR = 'Mridanc2'; // built this app
-const APP_VERSION = 'v7.6'; // bump this on every new build so you can confirm the deploy is live
+const APP_VERSION = 'v7.7'; // bump this on every new build so you can confirm the deploy is live
 const TROOPS = ['infantry', 'archer', 'cavalry'];
 const TROOP_LABEL = {
   infantry: 'Infantry',
@@ -6619,6 +6619,19 @@ const QuickGearSetup = ({
     if (n > max) n = max;
     return n;
   };
+  const stepBtn = {
+    width: 24,
+    height: 28,
+    borderRadius: 6,
+    border: '1px solid rgba(255,255,255,0.14)',
+    background: 'var(--kp-surface-3)',
+    color: 'var(--kp-text)',
+    fontSize: 15,
+    fontWeight: 700,
+    cursor: 'pointer',
+    lineHeight: 1,
+    padding: 0
+  };
   return /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'fixed',
@@ -6726,22 +6739,29 @@ const QuickGearSetup = ({
         cursor: 'pointer',
         textTransform: 'capitalize'
       }
-    }, r))), /*#__PURE__*/React.createElement("label", {
+    }, r))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2
+      }
+    }, /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 10,
         color: 'var(--kp-text-dim)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 3
+        marginRight: 2
       }
-    }, "Lv", /*#__PURE__*/React.createElement("input", {
+    }, "Lv"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setF(key, 'level', Math.max(0, (parseInt(d.level, 10) || 0) - 1)),
+      style: stepBtn
+    }, '\u2212'), /*#__PURE__*/React.createElement("input", {
       type: "text",
       inputMode: "numeric",
       value: d.level,
       onChange: e => setF(key, 'level', clampNum(e.target.value, cap)),
       style: {
-        width: 44,
-        padding: '5px 6px',
+        width: 42,
+        padding: '5px 4px',
         borderRadius: 6,
         border: '1px solid rgba(255,255,255,0.12)',
         background: 'var(--kp-surface-2)',
@@ -6749,26 +6769,37 @@ const QuickGearSetup = ({
         textAlign: 'center',
         fontSize: 12
       }
-    }), /*#__PURE__*/React.createElement("span", {
+    }), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setF(key, 'level', Math.min(cap, (parseInt(d.level, 10) || 0) + 1)),
+      style: stepBtn
+    }, "+"), /*#__PURE__*/React.createElement("span", {
       style: {
-        opacity: 0.5
+        opacity: 0.5,
+        fontSize: 10
       }
-    }, "/", cap)), /*#__PURE__*/React.createElement("label", {
+    }, "/", cap)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2
+      }
+    }, /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 10,
         color: 'var(--kp-text-dim)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 3
+        marginRight: 2
       }
-    }, "Mastery", /*#__PURE__*/React.createElement("input", {
+    }, "M"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setF(key, 'mastery', Math.max(0, (parseInt(d.mastery, 10) || 0) - 1)),
+      style: stepBtn
+    }, '\u2212'), /*#__PURE__*/React.createElement("input", {
       type: "text",
       inputMode: "numeric",
       value: d.mastery,
       onChange: e => setF(key, 'mastery', clampNum(e.target.value, MASTERY_MAX)),
       style: {
-        width: 40,
-        padding: '5px 6px',
+        width: 38,
+        padding: '5px 4px',
         borderRadius: 6,
         border: '1px solid rgba(255,255,255,0.12)',
         background: 'var(--kp-surface-2)',
@@ -6776,7 +6807,10 @@ const QuickGearSetup = ({
         textAlign: 'center',
         fontSize: 12
       }
-    })));
+    }), /*#__PURE__*/React.createElement("button", {
+      onClick: () => setF(key, 'mastery', Math.min(MASTERY_MAX, (parseInt(d.mastery, 10) || 0) + 1)),
+      style: stepBtn
+    }, "+")));
   }))), /*#__PURE__*/React.createElement("button", {
     onClick: () => onSave(draft),
     style: {
@@ -12837,7 +12871,7 @@ function App() {
         next.gear[key] = {
           ...current,
           rarity: action.rarity,
-          level: action.level,
+          level: current.rarity === action.rarity ? Math.max(current.level || 0, action.level) : action.level,
           mastery: current.mastery || 0
         };
       } else if (action.type === 'ascend') {
@@ -14375,11 +14409,8 @@ function App() {
   }));
 }
 import { createRoot } from 'react-dom/client';
-const __el = document.getElementById('root');
-if (__el) {
-  __el.innerHTML = '';
-  createRoot(__el).render(/*#__PURE__*/React.createElement(App));
-}
+const __el=document.getElementById('root');
+if(__el){__el.innerHTML='';createRoot(__el).render(/*#__PURE__*/React.createElement(App));}
 
 </script>
 <script>
