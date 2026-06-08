@@ -56,7 +56,7 @@ import { Upload, Check, X, AlertTriangle, ChevronRight, ChevronDown, Star, Hamme
 const BRAND_TITLE = "GEAR COMMAND CENTER";
 const GUIDE_AUTHOR = 'Shakes'; // created the strategy / guide
 const APP_AUTHOR = 'Mridanc2'; // built this app
-const APP_VERSION = 'v9.8'; // bump this on every new build so you can confirm the deploy is live
+const APP_VERSION = 'v9.9'; // bump this on every new build so you can confirm the deploy is live
 const TROOPS = ['infantry', 'archer', 'cavalry'];
 const TROOP_LABEL = {
   infantry: 'Infantry',
@@ -12718,8 +12718,20 @@ function App() {
   }, [state]);
   // App is dark-only — the gold-on-dark theme is the identity.
   const theme = 'dark';
+  // Embed mode: when the Companion iframes this tool (?embed=1 or window.__KP_EMBED),
+  // hide this tool's own header / language picker / footer so it blends into the Companion chrome.
+  const EMBED = (() => {
+    try {
+      if (typeof window !== 'undefined' && window.__KP_EMBED) return true;
+      return new URLSearchParams(window.location.search).get('embed') === '1';
+    } catch {
+      return false;
+    }
+  })();
   const [language, setLanguage] = useState(() => {
     try {
+      const forced = typeof window !== 'undefined' && window.__KP_LANG || new URLSearchParams(window.location.search).get('lang');
+      if (forced) return forced;
       return localStorage.getItem('kingshot-path-lang') || 'en';
     } catch {
       return 'en';
@@ -12995,8 +13007,8 @@ function App() {
       background: theme === 'light' ? 'radial-gradient(ellipse at top, #f5e9d0 0%, #e8d4a0 50%, #d4b873 100%)' : 'radial-gradient(ellipse at top, #0c1626 0%, #081020 50%, #05080f 100%)',
       color: 'var(--kp-text)',
       fontFamily: 'Inter, sans-serif',
-      padding: '20px 14px',
-      paddingBottom: 60,
+      padding: EMBED ? '8px 12px' : '20px 14px',
+      paddingBottom: EMBED ? 20 : 60,
       transition: 'background 0.4s, color 0.4s'
     }
   }, /*#__PURE__*/React.createElement("style", null, `
@@ -13051,7 +13063,7 @@ function App() {
       maxWidth: 920,
       margin: '0 auto'
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, !EMBED && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'flex-end',
@@ -13140,7 +13152,7 @@ function App() {
       alignItems: 'center',
       gap: 5
     }
-  }, "\u2139\uFE0F ", t('footer.howItWorks'))), (() => {
+  }, "\u2139\uFE0F ", t('footer.howItWorks')))), (() => {
     const activeTab = view === 'alliance' ? 'alliance' : activeAccount;
     const tabs = [{
       id: 'main',
@@ -14596,12 +14608,12 @@ function App() {
     t: t,
     code: state.allianceCode,
     isAdmin: false
-  })))), /*#__PURE__*/React.createElement(Footer, {
+  })))), !EMBED && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Footer, {
     t: t
   }), /*#__PURE__*/React.createElement(VisitCounter, {
     visits: visits,
     t: t
-  }), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
       marginTop: 14
@@ -14732,9 +14744,9 @@ function App() {
     t: t
   }));
 }
-import { createRoot } from 'react-dom/client';
-const __el=document.getElementById('root');
-if(__el){__el.innerHTML='';createRoot(__el).render(/*#__PURE__*/React.createElement(App));}
+import { createRoot } from "react-dom/client";
+const __el=document.getElementById("root");
+if(__el){__el.innerHTML="";createRoot(__el).render(React.createElement(App));}
 
 </script>
 <script>
