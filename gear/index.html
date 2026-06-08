@@ -56,7 +56,7 @@ import { Upload, Check, X, AlertTriangle, ChevronRight, ChevronDown, Star, Hamme
 const BRAND_TITLE = "GEAR COMMAND CENTER";
 const GUIDE_AUTHOR = 'Shakes'; // created the strategy / guide
 const APP_AUTHOR = 'Mridanc2'; // built this app
-const APP_VERSION = 'v8.6'; // bump this on every new build so you can confirm the deploy is live
+const APP_VERSION = 'v8.7'; // bump this on every new build so you can confirm the deploy is live
 const TROOPS = ['infantry', 'archer', 'cavalry'];
 const TROOP_LABEL = {
   infantry: 'Infantry',
@@ -5394,7 +5394,7 @@ const XP_PER_LEVEL = {
 const HAMMERS_FOR_MASTERY = toLevel => toLevel * 10;
 const MG_FOR_ASCEND = 2; // Mythic Gears to ascend Mythic → Red
 const MASTERY_FOR_ASCEND = 10; // Required Mastery Lv before ascending
-
+const FORGE_HAMMER = "data:image/webp;base64,UklGRpwHAABXRUJQVlA4IJAHAACQIgCdASpCAEgAPj0WiUMiISEYXE4AIAPEtgBbfarB89s/jH6Z/tV/qvlPqb9/+9fO2Xj/u/6Z1GPMA/UDpn+Yf9nPWH9Ff+Z9QD+bf6LrIvQA8uT9mfhB/cz0h6yPzX+o/an+fZW383wv+8LJl/oswC9d/pfER3J/+j49GgB+gPVc/kf+5/i/OV85f8j/H/AJ/KP6F/qf71/gvez9iHo4/sWoMVEAEX8uwl10zRwBfxDtlu8XpAqtt+2r+gXCaTGhpdWcgmQenRbq8cpbH5Oa0cO0VUWpZ3wBWauJE0zTIdQMXNCHo53TQ5COvKsMuDgpubg/IQOsk65FLgDiez5UMXR1bNmWMcb9qyn41QaaDHJoiOhpzDerj80b74AA0hDkGFC3sY046c7gCz/a/K7V/waR5yBXkWvof/9ZN04wQ5t5pksUjKn//k1YgJlzn4UUgRg71eIh2nykcFC+BAQ/j+qPo/8bvJ70+b2fhqZaHBlt5Q2q5vEPRQITDaWEAWqFPQrng6B6X/WfZ9kc030pj+yepANAW0DFdYqM1+408ZLycj8xmyGSfIO/7WOLFcJI/zt1bde2vUvEjk8m8SDzMRfPtmpB0JudRwA/C9HS8Ql71KrTJ0V1v+mYaBD5xV7qmd6fxQlVnCZNsyJCcHzBK3n+pnh+CZcuEq0z1GoU//tfZh5TTbpv7MViotPuQ0cyqa/94TVCk6Q023OW/8S/wSKkemwEKKZf9fLhXiP/yiNtFjvSwVc6+mJp73W3vvrJ00Pjm+E4f8XvMWbt1QskjGv5/jg/AUzkjAVqo3GlTF8Xx3gjI17OaiSUukmeZMrQE2KJ36/9XPD9x9XY+n/wjsahk+o6AfHmmzOwYq/5MO9P3v+WHqPIIyYkVaUFAUn8zSdKs/Tb5w5XlA8TyqQezcoHVRydEJc0y3/0fTJfXAEI8T+Vh6O85ydhIfjOFuaGZ7MfZ9hdH/LI1ILUH+Wn/zuxG3nlKlSW68NHV0XxMflZHfyklbNmCYGi2MRecQp97m41abp+BNWhRI6+DDPnLzU/4dXLKzkGfp0aM5Sx3UUhriFNpF2Vv7zEIdYBEEp/rDZHEjgAGcZBNzyzCwalHU9G0x7Evf3N9zrxAIarXy2QS03pAMFYYIy3HMZ6wp504lif6G4Dwf5UBLB319u/PHO5N0+R5qNNOrohWs/fqKf74DgOmD6+BmshNX3lq1MF+UnQHR9b8CFrP4PI/zkhzZlp7rZC3XxILkkah6SPilcHNlWGaVXclVs/ez1B3gpfSe6kmjAapKuSyzr8MvFtVIFQMYo2aQjsPAwUw23BeBUrzd5y2DvnZFC0WeuGNGergzcuei4UGY7bL7x1tzxQAlNZZSaa4o7AeN1TTgipqFFaLvNuD0/tS8ex/X2QOCYaaRvkd6g4LyOSjU3cQwj8pwcbo28TtH2Z8NoYzJ3WXcDnd+Bh+IEPB2wdAUywPJRQix3HDC5lJkhtyukX+y4RJyrV17iw1tIePt4t33oobz01zDRyT+aC6o1ubncEqd8Yr/89J6NDCIuq8eXnOVS5jZ5mB9scF3+1o8osEkGzYfS07dwf8pWxsg2HzbJbBf1AqBQx4LrCdjvyqjKPP/uE5JmXULpW7k2TfzkT3fuDpT0XBpaINdP+NcqzSLUkfyC8oc9VxfpYJyClcp6z2WZD2Z48iARG2jWpZfUHsG/C5TiY0fTpMr6NTNmZJe1snoOlm7+Lu7/b4TUQLm0yUEwDfz8bJCf2TnmjqqmZfYP8Wnu1TwG4u4x/+kA+qgZDIqZECUg8Tl1fx4S+Il6D3xnmVMSHm67awDyMmd+KREkrxd2l4oCjgwXmAo3R9XR0ZpexpEVk7fkc37Dpfy23Da/AmK9ZFw22nm+occv1hSg42Y/3Lw9hBawRjvWWYLgQBlMYzfm1odvYp8S0LFSgHlZfTlI8PqizECDZE+HjkX+Ua4m71BbxWI/XLZ7vQbu+6+TBHInpls48tt5UfFGcgCrLC2N7dR/jWTh/xnpaCvW71HFU+70DLgzBb5OsasFgkPpfi93bXLdxVj2b5s9Hn8/7V5szGgliNqreMte6Vco/k6/h1JQh/XnxypnMl3nvoYX3NEjCY7GA9Vl8sSSGzho9fddyABwbZ5QRZx2nAHO1fTeyIdDtHJJWfHm2l1hejQCRdlGT+9Fz/u7Puv5rAswPbaeoBF4rrjn6/IP/8yF/phkdT3cyrPWf66au6SHBdf5aO+XAtQIdUWTeMezUE14AONnaHisWftjY+tH4SyW2/lgO4LXkHG1b9TD8wM48UOeoOxAD/DeWH5tXKRQ013V6ybFrabcaVfdUE6Ibr24FOR9kyqzohXUMNUCd1PbpLAH91vhO6KI94dj0Fjm3oq8XqcuNvF3tlkEAQS27L4G3/X6LztpJpwZYePv7PfSXHfArN4C1Btesw4MCk6lookcXpwC3fH6F/4MqjzRI1vnL+qKDrkdzBrcfz/heCJscYN3eKNm9cxIifb5P7wv8GLbvyugkLIusa2cr2Tuy7vQJHrSF8LofCX2oIgV879DCO2RzLwV4S74V2bMA50lzEAAA";
 const RARITY_WORD = {
   grey: 'Grey',
   green: 'Green',
@@ -13325,6 +13325,249 @@ function App() {
         whiteSpace: 'nowrap'
       }
     }, gc === 0 ? 'Set up gear' : 'Update now')));
+  })(), (() => {
+    const rate = Math.max(1, parseInt(state.hammersPerMonth, 10) || 800);
+    const saved = Math.max(0, parseInt(state.hammersSaved, 10) || 0);
+    let ns = null;
+    for (const ph of activePath) {
+      if (ph.isChoose || ph.isStop || !ph.actions) continue;
+      for (const act of ph.actions) {
+        const an = analyzeAction(act, state.gear);
+        if (!an.done) {
+          ns = {
+            act,
+            an
+          };
+          break;
+        }
+      }
+      if (ns) break;
+    }
+    const inputStyle = {
+      width: '100%',
+      marginTop: 3,
+      padding: '7px 9px',
+      borderRadius: 8,
+      border: '1px solid rgba(255,255,255,0.14)',
+      background: 'rgba(0,0,0,0.25)',
+      color: 'var(--kp-text)',
+      fontSize: 14,
+      fontWeight: 700,
+      textAlign: 'center'
+    };
+    const inc = /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: 'var(--kp-surface-2)',
+        border: '1px solid rgba(201,169,97,0.25)',
+        borderRadius: 11,
+        padding: '11px 13px',
+        marginTop: 12,
+        marginBottom: 10
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        fontWeight: 800,
+        letterSpacing: 0.5,
+        color: 'var(--kp-text-gold)',
+        textTransform: 'uppercase',
+        marginBottom: 8,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 5
+      }
+    }, /*#__PURE__*/React.createElement("img", {
+      src: FORGE_HAMMER,
+      style: {
+        height: 15,
+        width: 15
+      }
+    }), " My Forgehammer income"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 10,
+        flexWrap: 'wrap'
+      }
+    }, /*#__PURE__*/React.createElement("label", {
+      style: {
+        flex: 1,
+        minWidth: 120,
+        fontSize: 10,
+        color: 'var(--kp-text-dim)'
+      }
+    }, "Per month", /*#__PURE__*/React.createElement("input", {
+      type: "text",
+      inputMode: "numeric",
+      value: state.hammersPerMonth ?? 800,
+      onChange: e => setState(p => ({
+        ...p,
+        hammersPerMonth: e.target.value.replace(/[^0-9]/g, '')
+      })),
+      style: inputStyle
+    })), /*#__PURE__*/React.createElement("label", {
+      style: {
+        flex: 1,
+        minWidth: 120,
+        fontSize: 10,
+        color: 'var(--kp-text-dim)'
+      }
+    }, "Saved now", /*#__PURE__*/React.createElement("input", {
+      type: "text",
+      inputMode: "numeric",
+      value: state.hammersSaved ?? 0,
+      onChange: e => setState(p => ({
+        ...p,
+        hammersSaved: e.target.value.replace(/[^0-9]/g, '')
+      })),
+      style: inputStyle
+    }))));
+    if (!ns) return /*#__PURE__*/React.createElement("div", null, inc);
+    const {
+      act,
+      an
+    } = ns;
+    const heroName = state.heroes && state.heroes[act.troop];
+    const hp = heroName && HERO_PORTRAITS[heroName];
+    const g = an.gap || {};
+    const isAscend = act.type === 'ascend' || g.needsAscension;
+    const tColor = TROOP_COLOR[act.troop] || 'var(--kp-text-gold)';
+    const label = isAscend ? 'Ascend ' + SLOT_LABEL[act.slot] + ' to Red' : SLOT_LABEL[act.slot] + ' \u2192 ' + (RARITY_WORD[act.rarity] || act.rarity) + ' L' + act.level;
+    const hammersNeed = isAscend ? 550 : 0;
+    const short = Math.max(0, hammersNeed - saved);
+    const days = hammersNeed ? Math.ceil(short / (rate / 30)) : 0;
+    return /*#__PURE__*/React.createElement("div", null, inc, /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: 'linear-gradient(160deg,rgba(28,42,66,0.97),rgba(16,26,42,0.98))',
+        border: '1px solid var(--kp-text-gold)',
+        borderRadius: 14,
+        padding: 16,
+        boxShadow: '0 6px 22px rgba(0,0,0,0.45)',
+        marginBottom: 12
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        letterSpacing: 1,
+        color: 'var(--kp-text-gold)',
+        fontWeight: 800,
+        textTransform: 'uppercase',
+        marginBottom: 9
+      }
+    }, '\u26A1', " Your next step"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12
+      }
+    }, hp ? /*#__PURE__*/React.createElement("img", {
+      src: hp,
+      alt: heroName,
+      style: {
+        width: 46,
+        height: 46,
+        borderRadius: '50%',
+        border: '2px solid ' + tColor,
+        objectFit: 'cover'
+      }
+    }) : /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 46,
+        height: 46,
+        borderRadius: '50%',
+        border: '2px solid ' + tColor,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: tColor,
+        fontWeight: 800
+      }
+    }, (heroName || TROOP_LABEL[act.troop]).charAt(0)), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontFamily: 'Cinzel, serif',
+        fontSize: 17,
+        fontWeight: 800,
+        color: '#fff'
+      }
+    }, label), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: tColor,
+        marginTop: 2
+      }
+    }, heroName || TROOP_LABEL[act.troop]))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        margin: '11px 0',
+        fontSize: 12,
+        color: 'var(--kp-text-dim)'
+      }
+    }, isAscend ? /*#__PURE__*/React.createElement("span", null, "Needs: ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: 'var(--kp-text)'
+      }
+    }, "Mastery 10"), " (", /*#__PURE__*/React.createElement("img", {
+      src: FORGE_HAMMER,
+      style: {
+        height: 15,
+        width: 15,
+        verticalAlign: -3
+      }
+    }), " 550) + ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: 'var(--kp-text)'
+      }
+    }, "2 Mythic Gears")) : /*#__PURE__*/React.createElement("span", null, "Needs: ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: 'var(--kp-text)'
+      }
+    }, fmtNum(g.xpCost || 0), " XP"), g.mithrilCost ? ' \u00b7 ' + g.mithrilCost + ' Mithril' : '', g.mgCost ? ' \u00b7 ' + g.mgCost + ' Mythic' : '')), isAscend && /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: 'var(--kp-surface-2)',
+        borderRadius: 9,
+        padding: '9px 11px',
+        fontSize: 12,
+        color: 'var(--kp-text-dim)',
+        marginBottom: 11,
+        lineHeight: 1.55
+      }
+    }, short <= 0 ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: '#22c55e',
+        fontWeight: 700
+      }
+    }, '\u2713', " You have enough to ascend now!") : /*#__PURE__*/React.createElement("span", null, "You have ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: 'var(--kp-text)'
+      }
+    }, saved), " ", /*#__PURE__*/React.createElement("img", {
+      src: FORGE_HAMMER,
+      style: {
+        height: 14,
+        width: 14,
+        verticalAlign: -3
+      }
+    }), " ", '\u2014', " ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: 'var(--kp-text)'
+      }
+    }, short, " short"), ", about ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: 'var(--kp-text)'
+      }
+    }, days, " days"), " at your rate.")), /*#__PURE__*/React.createElement("button", {
+      onClick: () => handleMarkDone(an),
+      style: {
+        width: '100%',
+        padding: 11,
+        border: 'none',
+        borderRadius: 10,
+        background: 'linear-gradient(135deg,#22c55e,#15803d)',
+        color: '#fff',
+        fontWeight: 800,
+        fontSize: 14,
+        fontFamily: 'Cinzel, serif',
+        cursor: 'pointer'
+      }
+    }, '\u2713', " I did this")));
   })(), /*#__PURE__*/React.createElement(PhaseOverview, {
     currentPhase: phase,
     gear: state.gear,
