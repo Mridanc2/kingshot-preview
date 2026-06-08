@@ -56,7 +56,7 @@ import { Upload, Check, X, AlertTriangle, ChevronRight, ChevronDown, Star, Hamme
 const BRAND_TITLE = "GEAR COMMAND CENTER";
 const GUIDE_AUTHOR = 'Shakes'; // created the strategy / guide
 const APP_AUTHOR = 'Mridanc2'; // built this app
-const APP_VERSION = 'v9.1'; // bump this on every new build so you can confirm the deploy is live
+const APP_VERSION = 'v9.4'; // bump this on every new build so you can confirm the deploy is live
 const TROOPS = ['infantry', 'archer', 'cavalry'];
 const TROOP_LABEL = {
   infantry: 'Infantry',
@@ -13293,14 +13293,7 @@ function App() {
         hammersPerMonth: e.target.value.replace(/[^0-9]/g, '')
       })),
       style: inputStyle
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        alignSelf: 'flex-end',
-        fontSize: 10,
-        color: 'var(--kp-text-faint)',
-        paddingBottom: 9
-      }
-    }, "Saved is taken from your Hammers above")));
+    }))));
     if (!ns) return /*#__PURE__*/React.createElement("div", null, inc);
     const {
       act,
@@ -13312,7 +13305,8 @@ function App() {
     const isAscend = act.type === 'ascend' || g.needsAscension;
     const tColor = TROOP_COLOR[act.troop] || 'var(--kp-text-gold)';
     const label = isAscend ? 'Ascend ' + SLOT_LABEL[act.slot] + ' to Red' : SLOT_LABEL[act.slot] + ' \u2192 ' + (RARITY_WORD[act.rarity] || act.rarity) + ' L' + act.level;
-    const hammersNeed = isAscend ? 550 : 0;
+    const cost = getTotalCost(an);
+    const hammersNeed = cost.hammers || 0;
     const short = Math.max(0, hammersNeed - saved);
     const days = hammersNeed ? Math.ceil(short / (rate / 30)) : 0;
     return /*#__PURE__*/React.createElement("div", null, inc, /*#__PURE__*/React.createElement("div", {
@@ -13380,26 +13374,34 @@ function App() {
         fontSize: 12,
         color: 'var(--kp-text-dim)'
       }
-    }, isAscend ? /*#__PURE__*/React.createElement("span", null, "Needs: ", /*#__PURE__*/React.createElement("b", {
-      style: {
-        color: 'var(--kp-text)'
-      }
-    }, "Mastery 10"), " (", /*#__PURE__*/React.createElement("img", {
+    }, /*#__PURE__*/React.createElement("span", null, "Needs:", cost.hammers ? /*#__PURE__*/React.createElement(React.Fragment, null, " ", /*#__PURE__*/React.createElement("img", {
       src: FORGE_HAMMER,
       style: {
         height: 15,
         width: 15,
         verticalAlign: -3
       }
-    }), " 550) + ", /*#__PURE__*/React.createElement("b", {
+    }), " ", /*#__PURE__*/React.createElement("b", {
       style: {
         color: 'var(--kp-text)'
       }
-    }, "2 Mythic Gears")) : /*#__PURE__*/React.createElement("span", null, "Needs: ", /*#__PURE__*/React.createElement("b", {
+    }, cost.hammers)) : null, cost.mg ? /*#__PURE__*/React.createElement(React.Fragment, null, " ", '\u00b7', " ", /*#__PURE__*/React.createElement("b", {
       style: {
         color: 'var(--kp-text)'
       }
-    }, fmtNum(g.xpCost || 0), " XP"), g.mithrilCost ? ' \u00b7 ' + g.mithrilCost + ' Mithril' : '', g.mgCost ? ' \u00b7 ' + g.mgCost + ' Mythic' : '')), isAscend && /*#__PURE__*/React.createElement("div", {
+    }, cost.mg), " Mythic") : null, cost.xp ? /*#__PURE__*/React.createElement(React.Fragment, null, " ", '\u00b7', " ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: 'var(--kp-text)'
+      }
+    }, fmtNum(cost.xp)), " XP") : null, cost.mithril ? /*#__PURE__*/React.createElement(React.Fragment, null, " ", '\u00b7', " ", /*#__PURE__*/React.createElement("b", {
+      style: {
+        color: 'var(--kp-text)'
+      }
+    }, cost.mithril), " Mithril") : null, isAscend ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: 'var(--kp-text-faint)'
+      }
+    }, " ", '\u2192', " ascend to Red") : null)), hammersNeed > 0 && /*#__PURE__*/React.createElement("div", {
       style: {
         background: 'var(--kp-surface-2)',
         borderRadius: 9,
@@ -13414,7 +13416,7 @@ function App() {
         color: '#22c55e',
         fontWeight: 700
       }
-    }, '\u2713', " You have enough to ascend now!") : /*#__PURE__*/React.createElement("span", null, "You have ", /*#__PURE__*/React.createElement("b", {
+    }, '\u2713', " You have enough Forgehammers now!") : /*#__PURE__*/React.createElement("span", null, "You have ", /*#__PURE__*/React.createElement("b", {
       style: {
         color: 'var(--kp-text)'
       }
@@ -14151,11 +14153,6 @@ function App() {
   }), (phase.isChoose || phase.isStop || phase.spec || state.specialization) && /*#__PURE__*/React.createElement(SpecializationTabs, {
     active: state.specialization,
     onChoose: setSpecialization,
-    t: t
-  }), /*#__PURE__*/React.createElement(CommentsSection, {
-    t: t
-  }), /*#__PURE__*/React.createElement(AllianceWidget, {
-    onJoin: () => setShowAlliance(true),
     t: t
   })), view === 'alliance' && ALLIANCE_DB_URL && /*#__PURE__*/React.createElement(React.Fragment, null, !state.allianceSetup ? /*#__PURE__*/React.createElement(AllianceSetup, {
     t: t,
