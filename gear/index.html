@@ -56,7 +56,7 @@ import { Upload, Check, X, AlertTriangle, ChevronRight, ChevronDown, Star, Hamme
 const BRAND_TITLE = "GEAR COMMAND CENTER";
 const GUIDE_AUTHOR = 'Shakes'; // created the strategy / guide
 const APP_AUTHOR = 'Mridanc2'; // built this app
-const APP_VERSION = 'v8.8'; // bump this on every new build so you can confirm the deploy is live
+const APP_VERSION = 'v9.1'; // bump this on every new build so you can confirm the deploy is live
 const TROOPS = ['infantry', 'archer', 'cavalry'];
 const TROOP_LABEL = {
   infantry: 'Infantry',
@@ -1160,7 +1160,7 @@ const I18N = {
     th: 'มุมขวาล่าง'
   },
   'step.open': {
-    en: 'Open your {troop} hero (tap the portrait in Heroes)',
+    en: 'Open Heroes and tap {hero}',
     es: 'Abre tu héroe de {troop} (toca el retrato en Héroes)',
     pt: 'Abra seu herói de {troop} (toque no retrato em Heróis)',
     fr: 'Ouvre ton héros {troop} (touche le portrait dans Héros)',
@@ -1178,6 +1178,10 @@ const I18N = {
     id: 'Buka hero {troop} (ketuk potret di Heroes)',
     vi: 'Mở tướng {troop} (chạm chân dung trong Heroes)',
     th: 'เปิดฮีโร่ {troop} (แตะรูปในเมนูฮีโร่)'
+  },
+  'step.gear': {
+    en: 'Tap the "Gear" tab',
+    he: 'הקש על לשונית "Gear"'
   },
   'step.tap': {
     en: 'Tap the {slot} ({pos} of the gear panel)',
@@ -8078,7 +8082,7 @@ const SLOT_POSITION = {
 };
 
 // ─── Build human-readable in-game steps for an action ───
-const buildInGameSteps = (analyzed, t) => {
+const buildInGameSteps = (analyzed, t, heroName) => {
   const {
     action,
     piece,
@@ -8089,6 +8093,7 @@ const buildInGameSteps = (analyzed, t) => {
   // graceful fallback if no translator passed
   const tr = t || ((k, v) => T(k, 'en', v));
   const troop = tr('troop.' + action.troop);
+  const hero = heroName || troop;
   const slot = tr('slot.' + action.slot);
   const POS_KEY = {
     helmet: 'pos.tl',
@@ -8098,8 +8103,10 @@ const buildInGameSteps = (analyzed, t) => {
   };
   const pos = tr(POS_KEY[action.slot] || 'pos.tl');
   steps.push(tr('step.open', {
-    troop
+    troop,
+    hero
   }));
+  steps.push(tr('step.gear'));
   steps.push(tr('step.tap', {
     slot,
     pos
@@ -8258,7 +8265,7 @@ const StepCard = ({
   const troopColor = TROOP_COLOR[action.troop];
   const isAscend = action.type === 'ascend';
   const cost = getTotalCost(analyzed);
-  const inGameSteps = buildInGameSteps(analyzed, t);
+  const inGameSteps = buildInGameSteps(analyzed, t, hero);
   const title = isAscend ? tr('action.ascend', {
     slot: slotName
   }) : tr('action.upgrade', {
@@ -13126,137 +13133,7 @@ function App() {
     }, /*#__PURE__*/React.createElement(Icon, {
       size: 14
     }), " ", label)));
-  })(), view === 'path' && /*#__PURE__*/React.createElement(React.Fragment, null, (() => {
-    const jp = pathProgress(state.gear, SHAKES_PATH);
-    const red = gearStats(state.gear).red;
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginBottom: 14,
-        borderRadius: 13,
-        padding: '13px 15px',
-        background: 'linear-gradient(135deg, rgba(201,169,97,0.14), var(--kp-panel))',
-        border: '1px solid rgba(201,169,97,0.3)',
-        boxShadow: '0 4px 18px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'baseline',
-        marginBottom: 7
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontFamily: 'Cinzel, serif',
-        fontSize: 12.5,
-        fontWeight: 800,
-        color: 'var(--kp-text-gold)',
-        letterSpacing: 0.5
-      }
-    }, "\uD83D\uDEE1\uFE0F ", t('progress.journey')), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontFamily: 'Cinzel, serif',
-        fontSize: 19,
-        fontWeight: 900,
-        color: '#fbbf24'
-      }
-    }, jp.pct, "%")), /*#__PURE__*/React.createElement("div", {
-      style: {
-        height: 11,
-        borderRadius: 99,
-        background: 'rgba(0,0,0,0.45)',
-        overflow: 'hidden',
-        border: '1px solid rgba(201,169,97,0.18)'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: `${jp.pct}%`,
-        height: '100%',
-        background: 'linear-gradient(90deg,#ef4444,#fbbf24,#22c55e)',
-        transition: 'width 0.6s ease'
-      }
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginTop: 6,
-        fontSize: 10.5,
-        fontWeight: 600
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: 'var(--kp-text-faint)'
-      }
-    }, t('progress.goals', {
-      done: jp.done,
-      total: jp.total
-    })), /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: red >= 12 ? '#86efac' : '#fca5a5',
-        fontWeight: 800
-      }
-    }, "\uD83D\uDD34 ", t('progress.redPieces', {
-      n: red
-    }))));
-  })(), (() => {
-    const power = gearScore(state.gear);
-    const MAX = TROOPS.length * SLOTS.length * (RARITY_WEIGHT.red || 5000) * 1.5;
-    const pct = Math.min(100, Math.round(power / MAX * 100));
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        marginBottom: 14,
-        borderRadius: 13,
-        padding: '12px 15px',
-        background: 'linear-gradient(135deg, rgba(96,165,250,0.12), var(--kp-panel))',
-        border: '1px solid rgba(96,165,250,0.3)',
-        boxShadow: '0 4px 18px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'baseline',
-        marginBottom: 7
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontFamily: 'Cinzel, serif',
-        fontSize: 12.5,
-        fontWeight: 800,
-        color: '#93c5fd',
-        letterSpacing: 0.5
-      }
-    }, "\u2694 ", t('progress.power')), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontFamily: 'Cinzel, serif',
-        fontSize: 18,
-        fontWeight: 900,
-        color: '#bfdbfe'
-      }
-    }, fmt(power))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        height: 9,
-        borderRadius: 99,
-        background: 'rgba(0,0,0,0.45)',
-        overflow: 'hidden',
-        border: '1px solid rgba(96,165,250,0.18)'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: `${pct}%`,
-        height: '100%',
-        background: 'linear-gradient(90deg,#3b82f6,#a855f7,#fbbf24)',
-        transition: 'width 0.5s ease'
-      }
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 10,
-        color: 'var(--kp-text-faint)',
-        marginTop: 6,
-        lineHeight: 1.4
-      }
-    }, t('progress.powerHint')));
-  })(), /*#__PURE__*/React.createElement(ResourcePills, {
+  })(), view === 'path' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(ResourcePills, {
     resources: state.resources,
     onEdit: () => setEditingResources(true),
     t: t
@@ -13339,7 +13216,7 @@ function App() {
     }, gc === 0 ? 'Set up gear' : 'Update now')));
   })(), (() => {
     const rate = Math.max(1, parseInt(state.hammersPerMonth, 10) || 800);
-    const saved = Math.max(0, parseInt(state.hammersSaved, 10) || 0);
+    const saved = Math.max(0, parseInt(state.resources && state.resources.hammers, 10) || 0);
     let ns = null;
     for (const ph of activePath) {
       if (ph.isChoose || ph.isStop || !ph.actions) continue;
@@ -13403,11 +13280,11 @@ function App() {
     }, /*#__PURE__*/React.createElement("label", {
       style: {
         flex: 1,
-        minWidth: 120,
+        minWidth: 160,
         fontSize: 10,
         color: 'var(--kp-text-dim)'
       }
-    }, "Per month", /*#__PURE__*/React.createElement("input", {
+    }, "Forgehammers earned per month", /*#__PURE__*/React.createElement("input", {
       type: "text",
       inputMode: "numeric",
       value: state.hammersPerMonth ?? 800,
@@ -13416,23 +13293,14 @@ function App() {
         hammersPerMonth: e.target.value.replace(/[^0-9]/g, '')
       })),
       style: inputStyle
-    })), /*#__PURE__*/React.createElement("label", {
+    })), /*#__PURE__*/React.createElement("div", {
       style: {
-        flex: 1,
-        minWidth: 120,
+        alignSelf: 'flex-end',
         fontSize: 10,
-        color: 'var(--kp-text-dim)'
+        color: 'var(--kp-text-faint)',
+        paddingBottom: 9
       }
-    }, "Saved now", /*#__PURE__*/React.createElement("input", {
-      type: "text",
-      inputMode: "numeric",
-      value: state.hammersSaved ?? 0,
-      onChange: e => setState(p => ({
-        ...p,
-        hammersSaved: e.target.value.replace(/[^0-9]/g, '')
-      })),
-      style: inputStyle
-    }))));
+    }, "Saved is taken from your Hammers above")));
     if (!ns) return /*#__PURE__*/React.createElement("div", null, inc);
     const {
       act,
@@ -13580,12 +13448,7 @@ function App() {
         cursor: 'pointer'
       }
     }, '\u2713', " I did this")));
-  })(), /*#__PURE__*/React.createElement(PhaseOverview, {
-    currentPhase: phase,
-    gear: state.gear,
-    path: activePath,
-    t: t
-  }), /*#__PURE__*/React.createElement(HeroSelector, {
+  })(), /*#__PURE__*/React.createElement(HeroSelector, {
     t: t,
     heroes: state.heroes,
     customImages: state.heroImages || {},
@@ -13701,7 +13564,142 @@ function App() {
         gear
       };
     })
-  }))), hasAnyGear && /*#__PURE__*/React.createElement("div", {
+  }))), (() => {
+    const jp = pathProgress(state.gear, SHAKES_PATH);
+    const red = gearStats(state.gear).red;
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: 14,
+        borderRadius: 13,
+        padding: '13px 15px',
+        background: 'linear-gradient(135deg, rgba(201,169,97,0.14), var(--kp-panel))',
+        border: '1px solid rgba(201,169,97,0.3)',
+        boxShadow: '0 4px 18px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'baseline',
+        marginBottom: 7
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: 'Cinzel, serif',
+        fontSize: 12.5,
+        fontWeight: 800,
+        color: 'var(--kp-text-gold)',
+        letterSpacing: 0.5
+      }
+    }, "\uD83D\uDEE1\uFE0F ", t('progress.journey')), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: 'Cinzel, serif',
+        fontSize: 19,
+        fontWeight: 900,
+        color: '#fbbf24'
+      }
+    }, jp.pct, "%")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        height: 11,
+        borderRadius: 99,
+        background: 'rgba(0,0,0,0.45)',
+        overflow: 'hidden',
+        border: '1px solid rgba(201,169,97,0.18)'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: `${jp.pct}%`,
+        height: '100%',
+        background: 'linear-gradient(90deg,#ef4444,#fbbf24,#22c55e)',
+        transition: 'width 0.6s ease'
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginTop: 6,
+        fontSize: 10.5,
+        fontWeight: 600
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: 'var(--kp-text-faint)'
+      }
+    }, t('progress.goals', {
+      done: jp.done,
+      total: jp.total
+    })), /*#__PURE__*/React.createElement("span", {
+      style: {
+        color: red >= 12 ? '#86efac' : '#fca5a5',
+        fontWeight: 800
+      }
+    }, "\uD83D\uDD34 ", t('progress.redPieces', {
+      n: red
+    }))));
+  })(), (() => {
+    const power = gearScore(state.gear);
+    const MAX = TROOPS.length * SLOTS.length * (RARITY_WEIGHT.red || 5000) * 1.5;
+    const pct = Math.min(100, Math.round(power / MAX * 100));
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginBottom: 14,
+        borderRadius: 13,
+        padding: '12px 15px',
+        background: 'linear-gradient(135deg, rgba(96,165,250,0.12), var(--kp-panel))',
+        border: '1px solid rgba(96,165,250,0.3)',
+        boxShadow: '0 4px 18px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'baseline',
+        marginBottom: 7
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: 'Cinzel, serif',
+        fontSize: 12.5,
+        fontWeight: 800,
+        color: '#93c5fd',
+        letterSpacing: 0.5
+      }
+    }, "\u2694 ", t('progress.power')), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: 'Cinzel, serif',
+        fontSize: 18,
+        fontWeight: 900,
+        color: '#bfdbfe'
+      }
+    }, fmt(power))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        height: 9,
+        borderRadius: 99,
+        background: 'rgba(0,0,0,0.45)',
+        overflow: 'hidden',
+        border: '1px solid rgba(96,165,250,0.18)'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: `${pct}%`,
+        height: '100%',
+        background: 'linear-gradient(90deg,#3b82f6,#a855f7,#fbbf24)',
+        transition: 'width 0.5s ease'
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10,
+        color: 'var(--kp-text-faint)',
+        marginTop: 6,
+        lineHeight: 1.4
+      }
+    }, t('progress.powerHint')));
+  })(), /*#__PURE__*/React.createElement(PhaseOverview, {
+    currentPhase: phase,
+    gear: state.gear,
+    path: activePath,
+    t: t
+  }), hasAnyGear && /*#__PURE__*/React.createElement("div", {
     style: {
       background: phase.isStop ? 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(10,18,32,0.7))' : 'linear-gradient(135deg, rgba(251,191,36,0.13), rgba(10,18,32,0.7))',
       border: phase.isStop ? '1.5px solid rgba(168,85,247,0.5)' : '1.5px solid rgba(251,191,36,0.5)',
